@@ -1,0 +1,355 @@
+:root {
+    --bg: #fdf6e3;
+    --bento: #fff9ef;
+    --bento-hover: #fff4e4;
+    --border: #f0e0c0;
+    --accent: #d98c2b;
+    --accent-dark: #b56a1a;
+    --text: #3b2a1f;
+    --shadow: 0 8px 20px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.02);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+/* Bento Grid */
+.bento-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.bento-item {
+    background: var(--bento);
+    border-radius: 2rem;
+    padding: 1.8rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.bento-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 30px rgba(0,0,0,0.08);
+}
+
+.header {
+    grid-column: 1 / -1;
+    text-align: center;
+    background: linear-gradient(135deg, #fff5e6, #fff9ef);
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    letter-spacing: -0.5px;
+    color: var(--accent-dark);
+}
+
+.game-card {
+    text-align: center;
+    cursor: pointer;
+}
+
+.game-icon {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-logo {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.game-card:hover .game-logo {
+    transform: scale(1.05);
+}
+
+.game-card h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.game-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 3rem;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-top: 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.game-btn:hover {
+    background: var(--accent-dark);
+}
+
+/* Страницы игр */
+.game-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--bento);
+    border-radius: 2.5rem;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+
+.back-btn {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-btn:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--accent-dark);
+}
+
+/* Стили для колеса */
+.wheel-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.canvas-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+canvas {
+    border-radius: 50%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: box-shadow 0.3s;
+    cursor: pointer;
+    background: #f0e0c0;
+}
+
+canvas:hover {
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+}
+
+/* Улучшенный указатель */
+.pointer {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 25px solid transparent;
+    border-right: 25px solid transparent;
+    border-top: 50px solid #e74c3c;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+    z-index: 10;
+    transition: filter 0.2s;
+}
+
+.pointer::before {
+    content: "";
+    position: absolute;
+    top: -55px;
+    left: -15px;
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, #e74c3c, #c0392b);
+    border-radius: 50%;
+    opacity: 0.7;
+}
+
+.pointer::after {
+    content: "▼";
+    position: absolute;
+    top: -50px;
+    left: -13px;
+    font-size: 35px;
+    color: #e74c3c;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.wheel-selector {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.wheel-selector label {
+    font-weight: 600;
+}
+
+select {
+    padding: 0.6rem 1rem;
+    border-radius: 2rem;
+    border: 1px solid var(--border);
+    background: white;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+#spinBtn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.8rem;
+    border-radius: 3rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+}
+
+#spinBtn:hover {
+    background: var(--accent-dark);
+}
+
+#spinBtn:active {
+    transform: scale(0.96);
+}
+
+.result-area {
+    text-align: center;
+    background: #fff3e0;
+    border-radius: 2rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.current-result {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.8rem;
+}
+
+.current-result span {
+    background: white;
+    padding: 0.3rem 1rem;
+    border-radius: 3rem;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.current-result span.highlight {
+    background: #d98c2b;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(217, 140, 43, 0.3);
+}
+
+.stats {
+    font-size: 1.2rem;
+    color: var(--accent-dark);
+}
+
+.history {
+    background: rgba(255,255,240,0.6);
+    border-radius: 1.5rem;
+    padding: 1.2rem;
+}
+
+.history h3 {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#historyList {
+    list-style: none;
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+#historyList li {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    font-family: monospace;
+}
+
+#clearHistoryBtn {
+    background: none;
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#clearHistoryBtn:hover {
+    background: #ffe0b5;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 700px) {
+    body {
+        padding: 1rem;
+    }
+    .current-result {
+        font-size: 1.3rem;
+    }
+    canvas {
+        width: 300px;
+        height: 300px;
+    }
+    .game-logo {
+        width: 80px;
+        height: 80px;
+    }
+}
+/* Дополнительные стили для новых игр */
+.game-logo {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 700px) {
+    .game-logo {
+        width: 80px;
+        height: 80px;
+    }
+}
