@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Challenge Wheels - Выбор игры</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="bento-grid">
+        <div class="bento-item header">
+            <h1>🎡 CHALLENGE WHEELS</h1>
+            <p>Выбери игру и испытай удачу!</p>
+        </div>
+
+        <div class="bento-item game-card" data-game="valorant">
+            <div class="game-icon">
+                <img src="img/valorant-logo.png" alt="Valorant" class="game-logo">
+            </div>
+            <h2>VALORANT</h2>
+            <p>Испытания, агенты, оружие и способности</p>
+            <button class="game-btn">Вращать колесо →</button>
+        </div>
+
+        <div class="bento-item game-card" data-game="pubg">
+            <div class="game-icon">
+                <img src="img/pubg-logo.png" alt="PUBG" class="game-logo">
+            </div>
+            <h2>PUBG</h2>
+            <p>Все локации из Мирамара, Эрангеля, Дестона и других карт</p>
+            <button class="game-btn">Вращать колесо →</button>
+        </div>
+
+        <div class="bento-item game-card" data-game="apex">
+            <div class="game-icon">
+                <img src="img/apex-logo.png" alt="Apex Legends" class="game-logo">
+            </div>
+            <h2>APEX LEGENDS</h2>
+            <p>Персонажи, классы, оружие и категории</p>
+            <button class="game-btn">Вращать колесо →</button>
+        </div>
+
+        <div class="bento-item game-card" data-game="drg">
+            <div class="game-icon">
+                <img src="img/drg-logo.png" alt="Deep Rock Galactic" class="game-logo">
+            </div>
+            <h2>DEEP ROCK GALACTIC</h2>
+            <p>Классы и оружие для каждого класса</p>
+            <button class="game-btn">Вращать колесо →</button>
+        </div>
+
+        <div class="bento-item game-card" data-game="ror2">
+            <div class="game-icon">
+                <img src="img/ror2-logo.png" alt="Risk of Rain 2" class="game-logo">
+            </div>
+            <h2>RISK OF RAIN 2</h2>
+            <p>Все персонажи из ROR2</p>
+            <button class="game-btn">Вращать колесо →</button>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.game-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const card = e.target.closest('.game-card');
+                const game = card.dataset.game;
+                window.location.href = `game/${game}.html`;
+            });
+        });
+    </script>
+</body>
+</html>
