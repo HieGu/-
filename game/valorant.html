@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valorant Challenge Wheel</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="game-container">
+        <a href="../index.html" class="back-btn">← Назад к играм</a>
+        <h1>🎯 VALORANT - Колесо испытаний</h1>
+        
+        <div class="wheel-selector">
+            <label>Выбери колесо:</label>
+            <select id="wheelSelect">
+                <option value="0">Испытания</option>
+                <option value="1">Агенты</option>
+                <option value="2">Пистолеты</option>
+                <option value="3">Всё оружие</option>
+                <option value="4">Способности</option>
+            </select>
+            <button id="spinBtn">🎲 ВРАЩАТЬ</button>
+        </div>
+
+        <div class="wheel-container">
+            <div class="canvas-wrapper">
+                <canvas id="wheelCanvas" width="500" height="500"></canvas>
+                <div class="pointer"></div>
+            </div>
+        </div>
+
+        <div class="result-area">
+            <div class="current-result">👉 <span id="result">—</span> 👈</div>
+            <div class="stats">Всего вращений: <span id="count">0</span></div>
+        </div>
+
+        <div class="history">
+            <h3>📜 История выпадений</h3>
+            <ul id="historyList"></ul>
+            <button id="clearHistoryBtn">Очистить историю</button>
+        </div>
+    </div>
+
+    <script src="../js/wheel.js"></script>
+    <script>
+        const wheelsDataValorant = [
+            ["Агент от тиммейта", "Брать оружие с пола", "Random Оружия", "Random Agent", "Эко", "Спец", "Дулик", "Страж", "Зачинщик", "Смена Оружия", "Без способностей", "Снайпер", "Инверсия мыши", "Инверсия управления", "Дробовик", "Без шифта", "Без контрола", "Скорострельность", "Только умениями", "Без звуков", "Блокировка рандомного умения", "Агент на букву A,B,C", "Агент на букву D,F,G", "Агент на букву H,I,J", "Агент на букву K,N,O", "Агент на букву P,R,S", "Агент на букву T,V,W,Y", "Жадный", "Не использовать ульту", "Агент имеющий смок", "Агент имеющий флешку", "Агент имеющий телепорт", "Агент имеющий Дэш", "Агент имеющий ловушку", "Агент имеющий молик", "Вам повезло здесь нет испытания", "Агент имеющий ревил", "Оружие как у тимейтов", "Найс Аим", "Низкая сенса", "Высокая Сенса", "Стрельба по кнопке", "Тратить по максимуму", "Всегда закупать все умения", "Использовать только молик", "Использовать только смок", "Использовать только флешку", "Использовать только ревил", "Использовать только одно умение за раунд", "Гонка вооружений", "Дуель", "Пушка от тимейта", "Отключение прицела", "Не закупать умения", "Агент имеющий хил способности"],
+            ["Astra", "Breach", "Brimstone", "Chamber", "Clove", "Cypher", "Deadlock", "Fade", "Gekko", "Harbor", "Iso", "Jett", "Kay/O", "Killjoy", "Neon", "Omen", "Phoenix", "Raze", "Reyna", "Sage", "Skye", "Sove", "Tejo", "Viper", "Vyse", "Waylay", "Yoru", "Veto", "Miks"],
+            ["Classic", "Shorty", "Frenzy", "Ghost", "Bandit", "Sheriff"],
+            ["Classic", "Shorty", "Frenzy", "Ghost", "Bandit", "Sheriff", "Stinger", "Spectre", "Bucky", "Judge", "Bulldog", "Guardian", "Phantom", "Vandal", "Knife", "Marshal", "Outlaw", "Operator", "Ares", "Odin"],
+            ["C", "Q", "E", "X"]
+        ];
+
+        initWheel(wheelsDataValorant, 'valorant');
+    </script>
+</body>
+</html>

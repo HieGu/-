@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUBG Challenge Wheel</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="game-container">
+        <a href="../index.html" class="back-btn">← Назад к играм</a>
+        <h1>🏝️ PUBG - Колесо локаций</h1>
+        
+        <div class="wheel-selector">
+            <label>Выбери карту:</label>
+            <select id="wheelSelect">
+                <option value="0">Мирамар</option>
+                <option value="1">Хевен</option>
+                <option value="2">Дестон</option>
+                <option value="3">Каракин</option>
+                <option value="4">Викенди</option>
+                <option value="5">Эрангель</option>
+                <option value="6">Санок</option>
+                <option value="7">Рондо</option>
+                <option value="8">Таего</option>
+            </select>
+            <button id="spinBtn">🎲 ВРАЩАТЬ</button>
+        </div>
+
+        <div class="wheel-container">
+            <div class="canvas-wrapper">
+                <canvas id="wheelCanvas" width="500" height="500"></canvas>
+                <div class="pointer"></div>
+            </div>
+        </div>
+
+        <div class="result-area">
+            <div class="current-result">👉 <span id="result">—</span> 👈</div>
+            <div class="stats">Всего вращений: <span id="count">0</span></div>
+        </div>
+
+        <div class="history">
+            <h3>📜 История выпадений</h3>
+            <ul id="historyList"></ul>
+            <button id="clearHistoryBtn">Очистить историю</button>
+        </div>
+    </div>
+
+    <script src="../js/wheel.js"></script>
+    <script>
+        const wheelsDataPUBG = [
+            ["Чумасера", "Эль-Посо", "Ла-Кобрерия", "Лос-Леонес", "Валье-дель-Мар", "Монте-Нуэво", "Сан-Мартин", "Крус-дель-Валье", "Эль-Асаар", "Импала", "Лос-Игос", "Пекадо", "Пуэрто-Параисо", "Тьерра-Бронка", "Торре-Аумада", "Ла-Бендита", "Усадьба Патрона", "Тюрьма"],
+            ["Карбоновый сталелитейный завод", "Угольные склады", "Промышленная зона", "Жилая зона", "Эстакада", "Доки"],
+            ["Баксли", "Кавала", "Эль-Коро", "Лос-Аркос", "Риптон", "Санкарна", "Арена", "Ассамблея", "Концерт", "Строительная площадка", "Плотина гидроэлектростанции", "Лодж", "Болото", "Десять фортов", "Ветряные электростанции"],
+            ["Аль-Хабар", "Бахр-Сахир", "Башара", "Хадика Немо", "Al Hayik", "Грузовое судно"],
+            ["Добро Место", "Горока", "Подвосте", "Волнова", "Аббатство", "Кантра", "Кричас", "Милнар", "Моватра", "Пильнец", "Пешкова", "Товар", "Древно", "Вихар", "Забава", "Дино-парк", "Замок", "Цементный завод", "Космодром", "Горячие источники", "Вилла", "Лесопилка", "Гора Крезнич", "Порт", "Винодельня", "Пещера"],
+            ["Георгиполь", "Новорепное", "Починки", "Ясная Поляна", "Гатка", "Камешки", "Липовка", "Мылта", "Приморск", "Рожок", "Северный", "Штальберг", "Жарки", "Сталбер", "Остров Сосновка", "Военная база Сосновка", "Школа"],
+            ["Бан Тай", "Лагерь Альфа", "Лагерь Браво", "Лагерь Чарли", "Ха Тинь", "Кхао", "Пай Нан", "Тат Мок", "Пещера", "Бхан", "Учебный лагерь", "Доки", "Лакави", "Монгнай", "На Кхам", "Курорт", "Тамбанг", "Храм/руины", "Карьер"],
+            ["Stadium", "Test Track", "NEOX Factory", "Mey Ran", "Yu Lin", "Jadena City", "Rin Jiang", "Jao Tin", "Hung Shan", "Tin Long Garden", "Dan Ching", "Nan Chuan", "Rai An", "Hemay Town", "Fong Tun", "Long Ho", "Mu Ho Pan", "Bei Li", "Bamboo", "Lo Hua Xing", "Kun Xia", "Min Hu", "Tu Ling", "Yun Gu", "Lan Po"],
+            ["Wol song", "Hae Moo Sa", "Go Dok", "Army Base", "Yong Cheon", "Shipyard", "Airport", "Kang Neung", "Terminal", "Buk San Sa", "Oh Hyang", "Studio", "Song Am", "School", "Ho San Prison", "Ho San", "Fishing Camp", "Ha Po", "Palace"]
+        ];
+
+        initWheel(wheelsDataPUBG, 'pubg');
+    </script>
+</body>
+</html>

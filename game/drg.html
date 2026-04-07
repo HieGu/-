@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Rock Galactic - Challenge Wheel</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="game-container">
+        <a href="../index.html" class="back-btn">← Назад к играм</a>
+        <h1>⛏️ DEEP ROCK GALACTIC - Колесо выбора</h1>
+        
+        <div class="wheel-selector">
+            <label>Выбери колесо:</label>
+            <select id="wheelSelect">
+                <option value="0">Классы</option>
+                <option value="1">Оружие 1 слот (Стрелок)</option>
+                <option value="2">Оружие 2 слот (Стрелок)</option>
+                <option value="3">Оружие 1 слот (Разведчик)</option>
+                <option value="4">Оружие 2 слот (Разведчик)</option>
+                <option value="5">Оружие 1 слот (Бурильщик)</option>
+                <option value="6">Оружие 2 слот (Бурильщик)</option>
+                <option value="7">Оружие 1 слот (Инженер)</option>
+                <option value="8">Оружие 2 слот (Инженер)</option>
+            </select>
+            <button id="spinBtn">🎲 ВРАЩАТЬ</button>
+        </div>
+
+        <div class="wheel-container">
+            <div class="canvas-wrapper">
+                <canvas id="wheelCanvas" width="500" height="500"></canvas>
+                <div class="pointer"></div>
+            </div>
+        </div>
+
+        <div class="result-area">
+            <div class="current-result">👉 <span id="result">—</span> 👈</div>
+            <div class="stats">Всего вращений: <span id="count">0</span></div>
+        </div>
+
+        <div class="history">
+            <h3>📜 История выпадений</h3>
+            <ul id="historyList"></ul>
+            <button id="clearHistoryBtn">Очистить историю</button>
+        </div>
+    </div>
+
+    <script src="../js/wheel.js"></script>
+    <script>
+        const wheelsDataDRG = [
+            ["Бурильщик", "Инженер", "Стрелок", "Разведчик"],
+            ["Свинцовый шторм", "Грозовая туча", "Ураган"],
+            ["Бульдог", "BRT7", "ARMSKORE"],
+            ["Deepcore GK2", "M1000", "DRAK-25"],
+            ["Бум-палка", "Nuk17", "X-80"],
+            ["CRSPR", "Криопушка", "Кислотный слиземёт"],
+            ["Субата 120", "Плазмозарядник", "COLETTE"],
+            ["Вепрь", "Крепыш", "LOK-1"],
+            ["РГМ", "Резак", "Расщепитель"]
+        ];
+
+        initWheel(wheelsDataDRG, 'drg');
+    </script>
+</body>
+</html>

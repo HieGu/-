@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk of Rain 2 - Challenge Wheel</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="game-container">
+        <a href="../index.html" class="back-btn">← Назад к играм</a>
+        <h1>🌧️ RISK OF RAIN 2 - Колесо персонажей</h1>
+        
+        <div class="wheel-selector">
+            <label>Выбери колесо:</label>
+            <select id="wheelSelect">
+                <option value="0">Все персонажи</option>
+            </select>
+            <button id="spinBtn">🎲 ВРАЩАТЬ</button>
+        </div>
+
+        <div class="wheel-container">
+            <div class="canvas-wrapper">
+                <canvas id="wheelCanvas" width="500" height="500"></canvas>
+                <div class="pointer"></div>
+            </div>
+        </div>
+
+        <div class="result-area">
+            <div class="current-result">👉 <span id="result">—</span> 👈</div>
+            <div class="stats">Всего вращений: <span id="count">0</span></div>
+        </div>
+
+        <div class="history">
+            <h3>📜 История выпадений</h3>
+            <ul id="historyList"></ul>
+            <button id="clearHistoryBtn">Очистить историю</button>
+        </div>
+    </div>
+
+    <script src="../js/wheel.js"></script>
+    <script>
+        const wheelsDataROR2 = [
+            [
+                "Commando", "Huntress", "Bandit", "MUL-T", "Engineer",
+                "Artificer", "Mercenary", "REX", "Loader", "Acrid",
+                "Captain", "Railgunner", "Void Fiend", "Seeker",
+                "False Son", "CHEF", "Operator", "Drifter"
+            ]
+        ];
+
+        initWheel(wheelsDataROR2, 'ror2');
+    </script>
+</body>
+</html>
