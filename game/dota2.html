@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dota 2 - Challenge Wheel</title>
+    
+    <!-- Иконки -->
+    <link rel="apple-touch-icon" sizes="180x180" href="../icon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icon/favicon-16x16.png">
+    <link rel="manifest" href="../icon/site.webmanifest">
+    
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="game-container">
+        <a href="../index.html" class="back-btn">← Назад к играм</a>
+        <h1>DOTA 2 - Колесо выбора</h1>
+        
+        <div class="wheel-selector">
+            <label>Выбери колесо:</label>
+            <select id="wheelSelect">
+                <option value="0">Персонажи</option>
+                <option value="1">Позиция</option>
+                <option value="2">Атрибут героя</option>
+            </select>
+            <button id="spinBtn">ВРАЩАТЬ</button>
+        </div>
+
+        <div class="wheel-container">
+            <div class="canvas-wrapper">
+                <canvas id="wheelCanvas" width="500" height="500"></canvas>
+                <div class="pointer"></div>
+            </div>
+        </div>
+
+        <div class="result-area">
+            <div class="current-result">👉 <span id="result">—</span> 👈</div>
+            <div class="stats">Всего вращений: <span id="count">0</span></div>
+        </div>
+
+        <div class="history">
+            <h3>История выпадений</h3>
+            <ul id="historyList"></ul>
+            <button id="clearHistoryBtn">Очистить историю</button>
+        </div>
+    </div>
+
+    <script src="../js/wheel.js"></script>
+    <script>
+        const wheelsDataDota2 = [
+            // Персонажи (все герои Dota 2)
+            [
+                "Abaddon", "Alchemist", "Ancient Apparition", "Anti-Mage", "Arc Warden",
+                "Axe", "Bane", "Batrider", "Beastmaster", "Bloodseeker",
+                "Bounty Hunter", "Brewmaster", "Bristleback", "Broodmother", "Centaur Warrunner",
+                "Chaos Knight", "Chen", "Clinkz", "Clockwerk", "Crystal Maiden",
+                "Dark Seer", "Dark Willow", "Dawnbreaker", "Dazzle", "Death Prophet",
+                "Disruptor", "Doom", "Dragon Knight", "Drow Ranger", "Earth Spirit",
+                "Earthshaker", "Elder Titan", "Ember Spirit", "Enchantress", "Enigma",
+                "Faceless Void", "Grimstroke", "Gyrocopter", "Hoodwink", "Huskar",
+                "Invoker", "Io", "Jakiro", "Juggernaut", "Keeper of the Light",
+                "Kez", "Kunkka", "Largo", "Legion Commander", "Leshrac",
+                "Lich", "Lifestealer", "Lina", "Lion", "Lone Druid",
+                "Luna", "Lycan", "Magnus", "Marci", "Mars",
+                "Medusa", "Meepo", "Mirana", "Monkey King", "Morphling",
+                "Muerta", "Naga Siren", "Nature's Prophet", "Necrophos", "Night Stalker",
+                "Nyx Assassin", "Ogre Magi", "Omniknight", "Oracle", "Outworld Destroyer",
+                "Pangolier", "Phantom Assassin", "Phantom Lancer", "Phoenix", "Primal Beast",
+                "Puck", "Pudge", "Pugna", "Queen of Pain", "Razor",
+                "Riki", "Ringmaster", "Rubick", "Sand King", "Shadow Demon",
+                "Shadow Fiend", "Shadow Shaman", "Silencer", "Skywrath Mage", "Slardar",
+                "Slark", "Snapfire", "Sniper", "Spectre", "Spirit Breaker",
+                "Storm Spirit", "Sven", "Techies", "Templar Assassin", "Terrorblade",
+                "Tidehunter", "Timbersaw", "Tinker", "Tiny", "Treant Protector",
+                "Troll Warlord", "Tusk", "Underlord", "Undying", "Ursa",
+                "Vengeful Spirit", "Venomancer", "Viper", "Visage", "Void Spirit",
+                "Warlock", "Weaver", "Windranger", "Winter Wyvern", "Witch Doctor",
+                "Wraith King", "Zeus"
+            ],
+            // Позиции
+            [
+                "1", "2", "3", "4", "5"
+            ],
+            // Атрибуты героев
+            [
+                "Сила", "Ловкость", "Интеллект", "Универсальный"
+            ]
+        ];
+
+        initWheel(wheelsDataDota2, 'dota2');
+    </script>
+</body>
+</html>

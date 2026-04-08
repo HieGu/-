@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Risk of Rain 2 - Challenge Wheel</title>
+    <title>7 Days to Die - Challenge Wheel</title>
     
     <!-- Иконки -->
     <link rel="apple-touch-icon" sizes="180x180" href="../icon/apple-touch-icon.png">
@@ -16,12 +16,13 @@
 <body>
     <div class="game-container">
         <a href="../index.html" class="back-btn">← Назад к играм</a>
-        <h1>RISK OF RAIN 2 - Колесо персонажей</h1>
+        <h1>7 DAYS TO DIE - Колесо выбора</h1>
         
         <div class="wheel-selector">
             <label>Выбери колесо:</label>
             <select id="wheelSelect">
-                <option value="0">Все персонажи</option>
+                <option value="0">Навыки</option>
+                <option value="1">Сложность</option>
             </select>
             <button id="spinBtn">ВРАЩАТЬ</button>
         </div>
@@ -47,16 +48,18 @@
 
     <script src="../js/wheel.js"></script>
     <script>
-        const wheelsDataROR2 = [
+        const wheelsData7DTD = [
+            // Навыки
             [
-                "Commando", "Huntress", "Bandit", "MUL-T", "Engineer",
-                "Artificer", "Mercenary", "REX", "Loader", "Acrid",
-                "Captain", "Railgunner", "Void Fiend", "Seeker",
-                "False Son", "CHEF", "Operator", "Drifter"
+                "Восприятие", "Сила", "Стойкость", "Ловкость", "Интеллект"
+            ],
+            // Сложность
+            [
+                "Мусорщик", "Путешественник", "Бродяга", "Воин", "Специалист по выживанию", "Безумец"
             ]
         ];
 
-        initWheel(wheelsDataROR2, 'ror2');
+        initWheel(wheelsData7DTD, '7dtd');
     </script>
 </body>
 </html>

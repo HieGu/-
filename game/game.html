@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Collection - Challenge Wheel</title>
+    
+    <!-- Иконки -->
+    <link rel="apple-touch-icon" sizes="180x180" href="../icon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icon/favicon-16x16.png">
+    <link rel="manifest" href="../icon/site.webmanifest">
+    
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="game-container">
+        <a href="../index.html" class="back-btn">← Назад к играм</a>
+        <h1>GAME - Колесо выбора</h1>
+        
+        <div class="wheel-selector">
+            <label>Выбери колесо:</label>
+            <select id="wheelSelect">
+                <option value="0">Коллекция игр</option>
+            </select>
+            <button id="spinBtn">ВРАЩАТЬ</button>
+        </div>
+
+        <div class="wheel-container">
+            <div class="canvas-wrapper">
+                <canvas id="wheelCanvas" width="500" height="500"></canvas>
+                <div class="pointer"></div>
+            </div>
+        </div>
+
+        <div class="result-area">
+            <div class="current-result">👉 <span id="result">—</span> 👈</div>
+            <div class="stats">Всего вращений: <span id="count">0</span></div>
+        </div>
+
+        <div class="history">
+            <h3>История выпадений</h3>
+            <ul id="historyList"></ul>
+            <button id="clearHistoryBtn">Очистить историю</button>
+        </div>
+    </div>
+
+    <script src="../js/wheel.js"></script>
+    <script>
+        const wheelsDataGame = [
+            [
+                "20 Minutes Till Dawn", "Ball x Pit", "Brotato", "CloverPit", "Cult of the Lamb",
+                "Dead Cells", "Deadly Days: Roadtrip", "Deep Rock Galactic", "Deep Rock Galactic: Rogue Core", "Escape from Duckov",
+                "Gunfire Reborn", "Inscryption", "Noobs are Coming", "Risk of Rain 2", "Risk of Rain",
+                "Risk of Rain Returns", "Roboquest", "ROUNDS", "Rungore", "Shape of Dreams",
+                "Slay the Spire", "Slay the Spire 2", "Sulfur", "The Binding of Isaac: Repentance +", "The Spell Brigade",
+                "Peak", "Hero Siege", "Deadzone: Rogue", "Temtem: Swarm", "Enter the Gungeon",
+                "Mortal Sin", "Last Man Sitting", "Neon Abyss", "Neon Abyss 2", "Megabonk",
+                "Deep Rock Galactic: Survivor", "КЛЕТЬ", "Gatekeeper", "Vampire Survivor", "Revenswatch",
+                "Windblown", "Soulstone Survivors", "Crab Champions", "Lort", "Hades II",
+                "Hades", "Haste", "Moonlighter 2: The Endless Vault", "Noita", "Moonlighter 2",
+                "Abyssus", "Teenage Mutant Ninja Turtles: Splintered fate", "Barony", "Morbid Metal", "Sifu",
+                "BackPack Battles", "Elden Ring Nightreign", "Darkest Dungeon II", "Wall World 2", "Wall World",
+                "For the King II", "For the King", "Dicey Dungeons", "Balatro", "The King Is Watching",
+                "Dome Keeper", "Tower Factory", "Clone Drone in the Danger Zone", "Sephiria", "Slots & Daggers",
+                "Stick it to the Stickman", "Ember Knights", "FTL", "CARMAGEDDON Rogue Shift", "Curse of the Dead Gods",
+                "HellClock", "He is Coming", "Skul The Hero Slayer", "Shotgun King", "Hotline Miami",
+                "Hotline Miami: Wrong Nomer", "Backpack Hero", "Ak-Xolotl Together", "Vampire Hunters", "God Braekers",
+                "Winnies Hole", "Peglin", "Kingdom Two Crowns", "Nuclear Throne", "Cat Bait",
+                "Returnal", "Skyhill", "Wizard With A Gun"
+            ]
+        ];
+
+        initWheel(wheelsDataGame, 'game');
+    </script>
+</body>
+</html>

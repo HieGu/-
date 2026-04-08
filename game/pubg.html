@@ -4,27 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PUBG Challenge Wheel</title>
+    
+    <!-- Иконки -->
+    <link rel="apple-touch-icon" sizes="180x180" href="../icon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icon/favicon-16x16.png">
+    <link rel="manifest" href="../icon/site.webmanifest">
+    
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
     <div class="game-container">
         <a href="../index.html" class="back-btn">← Назад к играм</a>
-        <h1>🏝️ PUBG - Колесо локаций</h1>
+        <h1>PUBG - Колесо локаций</h1>
         
         <div class="wheel-selector">
             <label>Выбери карту:</label>
             <select id="wheelSelect">
                 <option value="0">Мирамар</option>
-                <option value="1">Хевен</option>
-                <option value="2">Дестон</option>
-                <option value="3">Каракин</option>
-                <option value="4">Викенди</option>
-                <option value="5">Эрангель</option>
-                <option value="6">Санок</option>
-                <option value="7">Рондо</option>
-                <option value="8">Таего</option>
+                <option value="1">Эрангель</option>
+                <option value="2">Санок</option>
+                <option value="3">Викенди</option>
+                <option value="4">Рондо</option>
+                <option value="5">Таего</option>
             </select>
-            <button id="spinBtn">🎲 ВРАЩАТЬ</button>
+            <button id="spinBtn">ВРАЩАТЬ</button>
         </div>
 
         <div class="wheel-container">
@@ -40,7 +44,7 @@
         </div>
 
         <div class="history">
-            <h3>📜 История выпадений</h3>
+            <h3>История выпадений</h3>
             <ul id="historyList"></ul>
             <button id="clearHistoryBtn">Очистить историю</button>
         </div>
@@ -49,15 +53,54 @@
     <script src="../js/wheel.js"></script>
     <script>
         const wheelsDataPUBG = [
-            ["Чумасера", "Эль-Посо", "Ла-Кобрерия", "Лос-Леонес", "Валье-дель-Мар", "Монте-Нуэво", "Сан-Мартин", "Крус-дель-Валье", "Эль-Асаар", "Импала", "Лос-Игос", "Пекадо", "Пуэрто-Параисо", "Тьерра-Бронка", "Торре-Аумада", "Ла-Бендита", "Усадьба Патрона", "Тюрьма"],
-            ["Карбоновый сталелитейный завод", "Угольные склады", "Промышленная зона", "Жилая зона", "Эстакада", "Доки"],
-            ["Баксли", "Кавала", "Эль-Коро", "Лос-Аркос", "Риптон", "Санкарна", "Арена", "Ассамблея", "Концерт", "Строительная площадка", "Плотина гидроэлектростанции", "Лодж", "Болото", "Десять фортов", "Ветряные электростанции"],
-            ["Аль-Хабар", "Бахр-Сахир", "Башара", "Хадика Немо", "Al Hayik", "Грузовое судно"],
-            ["Добро Место", "Горока", "Подвосте", "Волнова", "Аббатство", "Кантра", "Кричас", "Милнар", "Моватра", "Пильнец", "Пешкова", "Товар", "Древно", "Вихар", "Забава", "Дино-парк", "Замок", "Цементный завод", "Космодром", "Горячие источники", "Вилла", "Лесопилка", "Гора Крезнич", "Порт", "Винодельня", "Пещера"],
-            ["Георгиполь", "Новорепное", "Починки", "Ясная Поляна", "Гатка", "Камешки", "Липовка", "Мылта", "Приморск", "Рожок", "Северный", "Штальберг", "Жарки", "Сталбер", "Остров Сосновка", "Военная база Сосновка", "Школа"],
-            ["Бан Тай", "Лагерь Альфа", "Лагерь Браво", "Лагерь Чарли", "Ха Тинь", "Кхао", "Пай Нан", "Тат Мок", "Пещера", "Бхан", "Учебный лагерь", "Доки", "Лакави", "Монгнай", "На Кхам", "Курорт", "Тамбанг", "Храм/руины", "Карьер"],
-            ["Stadium", "Test Track", "NEOX Factory", "Mey Ran", "Yu Lin", "Jadena City", "Rin Jiang", "Jao Tin", "Hung Shan", "Tin Long Garden", "Dan Ching", "Nan Chuan", "Rai An", "Hemay Town", "Fong Tun", "Long Ho", "Mu Ho Pan", "Bei Li", "Bamboo", "Lo Hua Xing", "Kun Xia", "Min Hu", "Tu Ling", "Yun Gu", "Lan Po"],
-            ["Wol song", "Hae Moo Sa", "Go Dok", "Army Base", "Yong Cheon", "Shipyard", "Airport", "Kang Neung", "Terminal", "Buk San Sa", "Oh Hyang", "Studio", "Song Am", "School", "Ho San Prison", "Ho San", "Fishing Camp", "Ha Po", "Palace"]
+            // Мирамар
+            [
+                "Torre Ahumada", "Campo Miliar", "Alcantara", "Ruins", "La Cobreria",
+                "Water Treatment", "Cruz del Valle", "Tierra-Bronca", "Trailer Park", "Crater Fields",
+                "El Azahar", "Sad Martin", "Hacienda del Patron", "Monte Nuevo", "Power Grid",
+                "Graveyard", "Minas Generales", "Junkyard", "La Bendita", "Pecado",
+                "Impala", "Los Leones", "Chumacera", "Ladrillera", "Puerto Paraiso",
+                "Valle del Mar", "Prison", "Minas del Sur", "Los Higos"
+            ],
+            // Эрангель
+            [
+                "Zharki", "Severny", "Stalber", "Kameshki", "Shooting Range",
+                "Georgopol", "Rozhok", "Yasnaya Polyana", "Ruins", "Hospital",
+                "School", "Mansion", "Lipovka", "Prison", "Mylta",
+                "Shelter", "Farm", "Mylta Power", "Pochinki", "Gatka",
+                "Quarry", "Primorsk", "Ferry Pier", "Sosnovka Military Base", "Norepnoye"
+            ],
+            // Санок
+            [
+                "Ha Tinh", "Tat Mok", "Khao", "Mongnai", "Camp Bravo",
+                "Bhan", "Bootcamp", "Camp Alpha", "Ruins", "Tambang",
+                "Na Kham", "Sahmee", "Pai Nan", "Camp Charlie", "Ban Tai",
+                "Quarry", "Cave", "Docks", "Kampong", "Lakawi"
+            ],
+            // Викенди
+            [
+                "Port", "Zabava", "Krichas", "Dobro Mesto", "Vihar",
+                "Movatra", "Dino Park", "Sawmill", "Minar", "Pilnec",
+                "Winery", "Volnova", "Cantra", "Hot Springs", "Castle",
+                "Tovar", "Villoa", "Goroka", "Coal Mine", "Mount Kreznic",
+                "Podvosto", "Cement Factory", "Peshkova", "Codmodrome", "Trevno",
+                "Lumber Yard"
+            ],
+            // Рондо
+            [
+                "Stadium", "Test Track", "NEOX Factory", "Mey Ran", "Yu Lin",
+                "Jadena City", "Rin Jiang", "Jao Tin", "Hung Shan", "Tin Long Garden",
+                "Dan Ching", "Nan Chuan", "Rai An", "Hemay Town", "Fong Tun",
+                "Long Ho", "Mu Ho Pan", "Bei Li", "Bamboo", "Lo Hua Xing",
+                "Kun Xia", "Min Hu", "Tu Ling", "Yun Gu", "Lan Po"
+            ],
+            // Таего
+            [
+                "Wol song", "Hae Moo Sa", "Go Dok", "Army Base", "Yong Cheon",
+                "Shipyard", "Airport", "Kang Neung", "Terminal", "Buk San Sa",
+                "Oh Hyang", "Studio", "Song Am", "School", "Ho San Prison",
+                "Ho San", "Fishing Camp", "Ha Po", "Palace"
+            ]
         ];
 
         initWheel(wheelsDataPUBG, 'pubg');
