@@ -159,7 +159,6 @@ canvas:hover {
     box-shadow: 0 15px 40px rgba(0,0,0,0.25);
 }
 
-/* Улучшенный указатель */
 .pointer {
     position: absolute;
     top: -25px;
@@ -172,7 +171,6 @@ canvas:hover {
     border-top: 50px solid #e74c3c;
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
     z-index: 10;
-    transition: filter 0.2s;
 }
 
 .pointer::before {
@@ -313,15 +311,6 @@ select {
     background: #ffe0b5;
 }
 
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
 @media (max-width: 700px) {
     body {
         padding: 1rem;
@@ -333,21 +322,6 @@ select {
         width: 300px;
         height: 300px;
     }
-    .game-logo {
-        width: 80px;
-        height: 80px;
-    }
-}
-/* Дополнительные стили для новых игр */
-.game-logo {
-    width: 120px;
-    height: 120px;
-    object-fit: contain;
-    transition: transform 0.3s ease;
-}
-
-/* Адаптация для мобильных */
-@media (max-width: 700px) {
     .game-logo {
         width: 80px;
         height: 80px;
