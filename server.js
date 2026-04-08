@@ -12,18 +12,15 @@ const mimeTypes = {
     '.png': 'image/png',
     '.jpg': 'image/jpeg',
     '.gif': 'image/gif',
-    '.ico': 'image/x-icon'
+    '.ico': 'image/x-icon',
+    '.webmanifest': 'application/manifest+json'
 };
 
 const server = http.createServer((req, res) => {
     let filePath = '.' + req.url;
     
-    // Если запрос к корню или к game папке
     if (filePath === './') {
         filePath = './index.html';
-    } else if (filePath.startsWith('./game/')) {
-        // Разрешаем доступ к папке game
-        filePath = '.' + req.url;
     }
     
     const extname = String(path.extname(filePath)).toLowerCase();
@@ -48,7 +45,5 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
     console.log(`✅ Сервер запущен на http://localhost:${PORT}`);
     console.log(`🎡 Открой в браузере: http://localhost:${PORT}`);
-    console.log(`📁 Структура:`);
-    console.log(`   - Главная страница: http://localhost:${PORT}/`);
-    console.log(`   - Страницы игр в папке /game/`);
+    console.log(`📁 Иконки находятся в папке /icon/`);
 });
