@@ -24,6 +24,7 @@
                 <option value="0">Персонажи</option>
                 <option value="1">Позиция</option>
                 <option value="2">Атрибут героя</option>
+                <option value="3">Предметы для сборки</option>
             </select>
             <button id="spinBtn">ВРАЩАТЬ</button>
         </div>
@@ -49,6 +50,44 @@
 
     <script src="../js/wheel.js"></script>
     <script>
+        // Массив предметов с весами для выпадения
+        const itemsWithWeights = [
+            // Базовые предметы (нормальный шанс)
+            "Magic Wand", "Bracer", "Null Talisman", "Wraith Band", "Soul Ring",
+            "Orb of Corrosion", "Falcon Blade", "Perseverance", "Power Treads", "Phase Boots",
+            "Oblivion Staff", "Mask of Madness", "Hand of Midas", "Boots of Travel", "Helm of the Dominator",
+            "Moon Shard", "Helm of the Overlord", "Buckler", "Headdress", "Ring of Basilius",
+            "Urn of Shadows", "Tranquil Boots", "Arcane Boots", "Pavise", "Drum of Endurance",
+            "Mekansm", "Vladmir's Offering", "Holy Locket", "Spirit Vessel", "Pipe of Insight",
+            "Boots of Bearing", "Guardian Greaves", "Parasma", "Veil of Discord", "Glimmer Cape",
+            "Force Staff", "Rod of Atos", "Aether Lens", "Eul's Scepter of Divinity", "Solar Crest",
+            "Witch Blade", "Dagon", "Orchid Malevolence", "Aghanim's Scepter", "Octarine Core",
+            "Refresher Orb", "Scythe of Vyse", "Gleipnir", "Aghanim's Blessing", "Wind Waker",
+            "Vanguard", "Blade Mail", "Aeon Disk", "Soul Booster", "Eternal Shroud",
+            "Crimson Guard", "Lotus Orb", "Black King Bar", "Bloodstone", "Hurricane Pike",
+            "Manta Style", "Linken's Sphere", "Assault Cuirass", "Shiva's Guard", "Heart of Tarrasque",
+            "Crystalys", "Armlet of Mordiggian", "Meteor Hammer", "Skull Basher", "Shadow Blade",
+            "Desolator", "Battle Fury", "Nullifier", "Monkey King Bar", "Revenant's Brooch",
+            "Daedalus", "Ethereal Blade", "Khanda", "Butterfly", "Silver Edge",
+            "Abyssal Blade", "Disperser", "Bloodthorn", "Dragon Lance", "Kaya",
+            "Sange", "Yasha", "Phylactery", "Diffusal Blade", "Echo Sabre",
+            "Mage Slayer", "Maelstrom", "Heaven's Halberd", "Yasha and Kaya", "Kaya and Sange",
+            "Sange and Yasha", "Harpoon", "Satanic", "Eye of Skadi", "Mjollnir",
+            "Arcane Blink", "Overwhelming Blink", "Swift Blink",
+            
+            // Radiance - повышенный шанс (добавляем несколько раз для увеличения шанса)
+            "Radiance", "Radiance", "Radiance", "Radiance", "Radiance",
+            
+            // Divine Rapier - пониженный шанс (добавляем только один раз)
+            "Divine Rapier"
+        ];
+
+        // Функция для получения случайного предмета с учетом весов
+        function getWeightedItem(items) {
+            const randomIndex = Math.floor(Math.random() * items.length);
+            return items[randomIndex];
+        }
+
         const wheelsDataDota2 = [
             // Персонажи (все герои Dota 2)
             [
@@ -80,16 +119,157 @@
                 "Wraith King", "Zeus"
             ],
             // Позиции
-            [
-                "1", "2", "3", "4", "5"
-            ],
+            ["1", "2", "3", "4", "5"],
             // Атрибуты героев
+            ["Сила", "Ловкость", "Интеллект", "Универсальный"],
+            // Предметы для сборки (с весами)
+            itemsWithWeights
+        ];
+
+        // Сохраняем оригинальную функцию initWheel, но переопределяем spin для колеса предметов
+        const originalInitWheel = initWheel;
+        
+        // Переопределяем initWheel для Dota 2 с кастомной логикой для предметов
+        window.initWheel = function(wheelsArray, gameKey) {
+            if (gameKey === 'dota2') {
+                // Сохраняем ссылку на оригинальную функцию
+                const customWheelsArray = [...wheelsArray];
+                
+                // Создаем кастомный обработчик для колеса предметов
+                const originalSpinFn = window.spinFunction;
+                
+                // Используем оригинальную инициализацию
+                originalInitWheel(customWheelsArray, gameKey);
+                
+                // Переопределяем функцию spin для колеса предметов после инициализации
+                setTimeout(() => {
+                    const wheelSelect = document.getElementById('wheelSelect');
+                    const spinBtn = document.getElementById('spinBtn');
+                    const resultSpan = document.getElementById('result');
+                    
+                    if (wheelSelect && spinBtn) {
+                        const originalClickHandler = spinBtn.onclick;
+                        
+                        spinBtn.onclick = function() {
+                            const selectedWheel = parseInt(wheelSelect.value);
+                            
+                            // Если выбрано колесо предметов (индекс 3)
+                            if (selectedWheel === 3) {
+                                // Используем взвешенный выбор для предметов
+                                const items = customWheelsArray[3];
+                                const selected = getWeightedItem(items);
+                                
+                                // Обновляем результат
+                                resultSpan.textContent = selected;
+                                
+                                // Обновляем историю и счетчик
+                                let spinCount = parseInt(localStorage.getItem(`wheel_${gameKey}_count`) || '0');
+                                spinCount++;
+                                localStorage.setItem(`wheel_${gameKey}_count`, spinCount);
+                                
+                                let history = JSON.parse(localStorage.getItem(`wheel_${gameKey}_history`) || '[]');
+                                history.unshift({ item: selected, timestamp: Date.now(), wheelName: "Предметы для сборки" });
+                                if (history.length > 100) history.pop();
+                                localStorage.setItem(`wheel_${gameKey}_history`, JSON.stringify(history));
+                                
+                                // Обновляем UI
+                                document.getElementById('count').textContent = spinCount;
+                                const historyList = document.getElementById('historyList');
+                                if (historyList) {
+                                    historyList.innerHTML = '';
+                                    history.slice(0, 20).forEach(item => {
+                                        const li = document.createElement('li');
+                                        li.textContent = `${item.item} (${item.wheelName})`;
+                                        historyList.appendChild(li);
+                                    });
+                                }
+                                
+                                // Визуальный эффект
+                                resultSpan.style.transform = 'scale(1.1)';
+                                setTimeout(() => {
+                                    resultSpan.style.transform = 'scale(1)';
+                                }, 200);
+                            } else {
+                                // Для остальных колес используем стандартную логику
+                                if (originalClickHandler) {
+                                    originalClickHandler();
+                                }
+                            }
+                        };
+                    }
+                }, 100);
+            } else {
+                originalInitWheel(wheelsArray, gameKey);
+            }
+        };
+    </script>
+    <script>
+        // Оригинальная инициализация с кастомными данными
+        const wheelsDataDota2Final = [
+            // Персонажи
             [
-                "Сила", "Ловкость", "Интеллект", "Универсальный"
+                "Abaddon", "Alchemist", "Ancient Apparition", "Anti-Mage", "Arc Warden",
+                "Axe", "Bane", "Batrider", "Beastmaster", "Bloodseeker",
+                "Bounty Hunter", "Brewmaster", "Bristleback", "Broodmother", "Centaur Warrunner",
+                "Chaos Knight", "Chen", "Clinkz", "Clockwerk", "Crystal Maiden",
+                "Dark Seer", "Dark Willow", "Dawnbreaker", "Dazzle", "Death Prophet",
+                "Disruptor", "Doom", "Dragon Knight", "Drow Ranger", "Earth Spirit",
+                "Earthshaker", "Elder Titan", "Ember Spirit", "Enchantress", "Enigma",
+                "Faceless Void", "Grimstroke", "Gyrocopter", "Hoodwink", "Huskar",
+                "Invoker", "Io", "Jakiro", "Juggernaut", "Keeper of the Light",
+                "Kez", "Kunkka", "Largo", "Legion Commander", "Leshrac",
+                "Lich", "Lifestealer", "Lina", "Lion", "Lone Druid",
+                "Luna", "Lycan", "Magnus", "Marci", "Mars",
+                "Medusa", "Meepo", "Mirana", "Monkey King", "Morphling",
+                "Muerta", "Naga Siren", "Nature's Prophet", "Necrophos", "Night Stalker",
+                "Nyx Assassin", "Ogre Magi", "Omniknight", "Oracle", "Outworld Destroyer",
+                "Pangolier", "Phantom Assassin", "Phantom Lancer", "Phoenix", "Primal Beast",
+                "Puck", "Pudge", "Pugna", "Queen of Pain", "Razor",
+                "Riki", "Ringmaster", "Rubick", "Sand King", "Shadow Demon",
+                "Shadow Fiend", "Shadow Shaman", "Silencer", "Skywrath Mage", "Slardar",
+                "Slark", "Snapfire", "Sniper", "Spectre", "Spirit Breaker",
+                "Storm Spirit", "Sven", "Techies", "Templar Assassin", "Terrorblade",
+                "Tidehunter", "Timbersaw", "Tinker", "Tiny", "Treant Protector",
+                "Troll Warlord", "Tusk", "Underlord", "Undying", "Ursa",
+                "Vengeful Spirit", "Venomancer", "Viper", "Visage", "Void Spirit",
+                "Warlock", "Weaver", "Windranger", "Winter Wyvern", "Witch Doctor",
+                "Wraith King", "Zeus"
+            ],
+            // Позиции
+            ["1", "2", "3", "4", "5"],
+            // Атрибуты героев
+            ["Сила", "Ловкость", "Интеллект", "Универсальный"],
+            // Предметы для сборки (с весами)
+            [
+                "Magic Wand", "Bracer", "Null Talisman", "Wraith Band", "Soul Ring",
+                "Orb of Corrosion", "Falcon Blade", "Perseverance", "Power Treads", "Phase Boots",
+                "Oblivion Staff", "Mask of Madness", "Hand of Midas", "Boots of Travel", "Helm of the Dominator",
+                "Moon Shard", "Helm of the Overlord", "Buckler", "Headdress", "Ring of Basilius",
+                "Urn of Shadows", "Tranquil Boots", "Arcane Boots", "Pavise", "Drum of Endurance",
+                "Mekansm", "Vladmir's Offering", "Holy Locket", "Spirit Vessel", "Pipe of Insight",
+                "Boots of Bearing", "Guardian Greaves", "Parasma", "Veil of Discord", "Glimmer Cape",
+                "Force Staff", "Rod of Atos", "Aether Lens", "Eul's Scepter of Divinity", "Solar Crest",
+                "Witch Blade", "Dagon", "Orchid Malevolence", "Aghanim's Scepter", "Octarine Core",
+                "Refresher Orb", "Scythe of Vyse", "Gleipnir", "Aghanim's Blessing", "Wind Waker",
+                "Vanguard", "Blade Mail", "Aeon Disk", "Soul Booster", "Eternal Shroud",
+                "Crimson Guard", "Lotus Orb", "Black King Bar", "Bloodstone", "Hurricane Pike",
+                "Manta Style", "Linken's Sphere", "Assault Cuirass", "Shiva's Guard", "Heart of Tarrasque",
+                "Crystalys", "Armlet of Mordiggian", "Meteor Hammer", "Skull Basher", "Shadow Blade",
+                "Desolator", "Battle Fury", "Nullifier", "Monkey King Bar", "Revenant's Brooch",
+                "Daedalus", "Ethereal Blade", "Khanda", "Butterfly", "Silver Edge",
+                "Abyssal Blade", "Disperser", "Bloodthorn", "Dragon Lance", "Kaya",
+                "Sange", "Yasha", "Phylactery", "Diffusal Blade", "Echo Sabre",
+                "Mage Slayer", "Maelstrom", "Heaven's Halberd", "Yasha and Kaya", "Kaya and Sange",
+                "Sange and Yasha", "Harpoon", "Satanic", "Eye of Skadi", "Mjollnir",
+                "Arcane Blink", "Overwhelming Blink", "Swift Blink",
+                // Radiance повторяется 5 раз для повышенного шанса
+                "Radiance", "Radiance", "Radiance", "Radiance", "Radiance",
+                // Divine Rapier только один раз для пониженного шанса
+                "Divine Rapier"
             ]
         ];
 
-        initWheel(wheelsDataDota2, 'dota2');
+        initWheel(wheelsDataDota2Final, 'dota2');
     </script>
 </body>
 </html>
