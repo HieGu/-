@@ -25,6 +25,7 @@
                 <option value="1">Позиция</option>
                 <option value="2">Атрибут героя</option>
                 <option value="3">Предметы для сборки</option>
+                <option value="4">Режим игры</option>
             </select>
             <button id="spinBtn">ВРАЩАТЬ</button>
         </div>
@@ -123,29 +124,27 @@
             // Атрибуты героев
             ["Сила", "Ловкость", "Интеллект", "Универсальный"],
             // Предметы для сборки (с весами)
-            itemsWithWeights
+            itemsWithWeights,
+            // Режимы игры
+            ["Рейт", "ALL Pick", "Turbo", "Single Draft", "Random Draft", "Ability Draft"]
         ];
 
-        // Сохраняем оригинальную функцию initWheel, но переопределяем spin для колеса предметов
-        const originalInitWheel = initWheel;
+        // Сохраняем оригинальную функцию initWheel
+        const originalInitWheel = window.initWheel;
         
         // Переопределяем initWheel для Dota 2 с кастомной логикой для предметов
         window.initWheel = function(wheelsArray, gameKey) {
             if (gameKey === 'dota2') {
-                // Сохраняем ссылку на оригинальную функцию
-                const customWheelsArray = [...wheelsArray];
-                
                 // Создаем кастомный обработчик для колеса предметов
-                const originalSpinFn = window.spinFunction;
-                
-                // Используем оригинальную инициализацию
-                originalInitWheel(customWheelsArray, gameKey);
+                originalInitWheel(wheelsArray, gameKey);
                 
                 // Переопределяем функцию spin для колеса предметов после инициализации
                 setTimeout(() => {
                     const wheelSelect = document.getElementById('wheelSelect');
                     const spinBtn = document.getElementById('spinBtn');
                     const resultSpan = document.getElementById('result');
+                    const countSpan = document.getElementById('count');
+                    const historyList = document.getElementById('historyList');
                     
                     if (wheelSelect && spinBtn) {
                         const originalClickHandler = spinBtn.onclick;
@@ -156,8 +155,9 @@
                             // Если выбрано колесо предметов (индекс 3)
                             if (selectedWheel === 3) {
                                 // Используем взвешенный выбор для предметов
-                                const items = customWheelsArray[3];
+                                const items = wheelsArray[3];
                                 const selected = getWeightedItem(items);
+                                const wheelName = wheelSelect.options[wheelSelect.selectedIndex].text;
                                 
                                 // Обновляем результат
                                 resultSpan.textContent = selected;
@@ -166,15 +166,14 @@
                                 let spinCount = parseInt(localStorage.getItem(`wheel_${gameKey}_count`) || '0');
                                 spinCount++;
                                 localStorage.setItem(`wheel_${gameKey}_count`, spinCount);
+                                countSpan.textContent = spinCount;
                                 
                                 let history = JSON.parse(localStorage.getItem(`wheel_${gameKey}_history`) || '[]');
-                                history.unshift({ item: selected, timestamp: Date.now(), wheelName: "Предметы для сборки" });
+                                history.unshift({ item: selected, timestamp: Date.now(), wheelName: wheelName });
                                 if (history.length > 100) history.pop();
                                 localStorage.setItem(`wheel_${gameKey}_history`, JSON.stringify(history));
                                 
-                                // Обновляем UI
-                                document.getElementById('count').textContent = spinCount;
-                                const historyList = document.getElementById('historyList');
+                                // Обновляем историю в UI
                                 if (historyList) {
                                     historyList.innerHTML = '';
                                     history.slice(0, 20).forEach(item => {
@@ -189,6 +188,9 @@
                                 setTimeout(() => {
                                     resultSpan.style.transform = 'scale(1)';
                                 }, 200);
+                                
+                                // Сохраняем текущий результат
+                                localStorage.setItem(`wheel_${gameKey}_last_result`, selected);
                             } else {
                                 // Для остальных колес используем стандартную логику
                                 if (originalClickHandler) {
@@ -262,11 +264,11 @@
                 "Mage Slayer", "Maelstrom", "Heaven's Halberd", "Yasha and Kaya", "Kaya and Sange",
                 "Sange and Yasha", "Harpoon", "Satanic", "Eye of Skadi", "Mjollnir",
                 "Arcane Blink", "Overwhelming Blink", "Swift Blink",
-                // Radiance повторяется 5 раз для повышенного шанса
                 "Radiance", "Radiance", "Radiance", "Radiance", "Radiance",
-                // Divine Rapier только один раз для пониженного шанса
                 "Divine Rapier"
-            ]
+            ],
+            // Режимы игры
+            ["Рейт", "ALL Pick", "Turbo", "Single Draft", "Random Draft", "Ability Draft"]
         ];
 
         initWheel(wheelsDataDota2Final, 'dota2');
