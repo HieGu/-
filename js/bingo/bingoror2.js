@@ -26,7 +26,7 @@ let currentBoard = [];
 let currentPlayers = [];
 let currentPlayerId = null;
 let currentRoomId = null;
-let ws = null;
+let syncInterval = null;
 
 function generateRandomBoard() {
     const shuffled = [...challenges];
@@ -70,6 +70,7 @@ function renderGrid() {
         
         const markers = document.getElementById(`markers-${i}`);
         if (markers) {
+            markers.innerHTML = '';
             for (const p of currentPlayers) {
                 if (p.completedCells[i]) {
                     const marker = document.createElement('div');
@@ -85,8 +86,11 @@ function renderGrid() {
     
     if (myPlayer) {
         const linesCount = countLines(myPlayer.completedCells);
-        document.getElementById('bingoLines').innerHTML = `<div class="line-stat">Собрано линий: ${linesCount}</div>`;
-        if (linesCount >= 5) showMessage(`Бинго! ${myPlayer.name} собрал ${linesCount} линий!`);
+        const linesContainer = document.getElementById('bingoLines');
+        if (linesContainer) {
+            linesContainer.innerHTML = `<div class="line-stat">Собрано линий: ${linesCount}</div>`;
+            if (linesCount >= 5) showMessage(`Бинго! ${myPlayer.name} собрал ${linesCount} линий!`);
+        }
     }
     
     const playersDiv = document.getElementById('playersList');
@@ -94,133 +98,170 @@ function renderGrid() {
         playersDiv.innerHTML = '<strong>Игроки:</strong><br>';
         for (const p of currentPlayers) {
             const completed = p.completedCells.filter(c => c).length;
+            const lines = countLines(p.completedCells);
             playersDiv.innerHTML += `<div class="player-tag ${p.id === currentPlayerId ? 'you' : ''}">
-                ${p.name} ${p.id === currentPlayerId ? '(вы)' : ''} (${completed}/25, ${countLines(p.completedCells)} линий)
+                ${p.name} ${p.id === currentPlayerId ? '(вы)' : ''} (${completed}/25, ${lines} линий)
             </div>`;
         }
     }
 }
 
-function toggleCell(index) {
-    if (!ws || !currentRoomId || !currentPlayerId) return;
+async function toggleCell(index) {
+    if (!currentRoomId || !currentPlayerId) return;
+    
     const myPlayer = currentPlayers.find(p => p.id === currentPlayerId);
-    if (myPlayer) {
-        ws.send(JSON.stringify({
-            type: 'toggle_cell',
-            cellIndex: index,
-            completed: !myPlayer.completedCells[index]
-        }));
+    if (!myPlayer) return;
+    
+    // Обновляем локально
+    myPlayer.completedCells[index] = !myPlayer.completedCells[index];
+    
+    // Отправляем на сервер
+    try {
+        await fetch('/api/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                roomId: currentRoomId,
+                playerId: currentPlayerId,
+                completedCells: myPlayer.completedCells
+            })
+        });
+        
+        // Обновляем отображение
+        renderGrid();
+        
+    } catch (err) {
+        console.error('Ошибка отправки:', err);
+        showMessage('Ошибка синхронизации', true);
+        // Откатываем изменение
+        myPlayer.completedCells[index] = !myPlayer.completedCells[index];
+        renderGrid();
     }
 }
 
-function connectWebSocket() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    ws = new WebSocket(`${protocol}//${window.location.host}`);
+async function syncWithServer() {
+    if (!currentRoomId) return;
     
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log('Получено:', data.type);
+    try {
+        const response = await fetch(`/api/sync/${currentRoomId}`);
+        const data = await response.json();
         
-        switch (data.type) {
-            case 'room_created':
-                currentRoomId = data.roomId;
-                currentPlayerId = data.playerId;
-                currentBoard = data.board;
-                currentPlayers = data.players;
-                document.getElementById('roomCode').textContent = currentRoomId;
-                document.getElementById('roomPanel').classList.remove('hidden');
-                document.getElementById('mainMenu').classList.add('hidden');
-                renderGrid();
-                showMessage(`Комната создана! Код: ${currentRoomId}`);
-                break;
-                
-            case 'room_joined':
-                currentRoomId = data.roomId;
-                currentPlayerId = data.playerId;
-                currentBoard = data.board;
-                currentPlayers = data.players;
-                document.getElementById('roomCode').textContent = currentRoomId;
-                document.getElementById('roomPanel').classList.remove('hidden');
-                document.getElementById('mainMenu').classList.add('hidden');
-                renderGrid();
-                showMessage('Вы присоединились к комнате!');
-                break;
-                
-            case 'player_joined':
-                currentPlayers = data.players;
-                renderGrid();
-                showMessage('Новый игрок присоединился!');
-                break;
-                
-            case 'cell_updated':
-                currentPlayers = data.players;
-                renderGrid();
-                const cell = document.querySelector(`.bingo-cell:nth-child(${data.cellIndex + 1})`);
-                if (cell) {
-                    cell.style.animation = 'flash 0.3s ease';
-                    setTimeout(() => cell.style.animation = '', 300);
-                }
-                break;
-                
-            case 'player_left':
-                currentPlayers = data.players;
-                renderGrid();
-                showMessage('Игрок покинул комнату');
-                break;
-                
-            case 'board_updated':
-                currentBoard = data.board;
-                currentPlayers = data.players;
-                renderGrid();
-                showMessage('Создано новое поле!');
-                break;
-                
-            case 'game_reset':
-                currentPlayers = data.players;
-                renderGrid();
-                showMessage('Прогресс сброшен!');
-                break;
-                
-            case 'error':
-                showMessage(data.message, true);
-                break;
+        if (data.success) {
+            // Обновляем данные с сервера
+            currentPlayers = data.players;
+            currentBoard = data.board;
+            renderGrid();
+        } else if (data.error === 'Комната не найдена') {
+            showMessage('Комната была закрыта', true);
+            leaveRoom();
         }
-    };
-    
-    ws.onerror = () => showMessage('Ошибка соединения', true);
-    ws.onclose = () => {
-        if (currentRoomId) showMessage('Соединение потеряно', true);
-    };
+    } catch (err) {
+        console.error('Ошибка синхронизации:', err);
+    }
 }
 
-function createRoom() {
+async function createRoom() {
     const playerName = prompt('Введите ваше имя:', 'Игрок');
     if (!playerName) return;
     
     const newBoard = generateRandomBoard();
-    connectWebSocket();
     
-    ws.onopen = () => {
-        ws.send(JSON.stringify({ type: 'create_room', playerName: playerName, board: newBoard }));
-    };
+    try {
+        const response = await fetch('/api/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                playerName: playerName,
+                board: newBoard
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            currentRoomId = data.roomId;
+            currentPlayerId = data.playerId;
+            currentBoard = data.board;
+            currentPlayers = data.players;
+            
+            document.getElementById('roomCode').textContent = currentRoomId;
+            document.getElementById('roomPanel').classList.remove('hidden');
+            document.getElementById('mainMenu').classList.add('hidden');
+            renderGrid();
+            showMessage(`Комната создана! Код: ${currentRoomId}`);
+            
+            // Запускаем синхронизацию
+            if (syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(syncWithServer, 1000);
+        } else {
+            showMessage(data.error || 'Ошибка создания комнаты', true);
+        }
+    } catch (err) {
+        showMessage('Ошибка соединения с сервером', true);
+    }
 }
 
-function joinRoom() {
+async function joinRoom() {
     const roomId = document.getElementById('roomIdInput').value;
-    if (!roomId) { showMessage('Введите код комнаты', true); return; }
+    if (!roomId) {
+        showMessage('Введите код комнаты', true);
+        return;
+    }
     
     const playerName = prompt('Введите ваше имя:', 'Игрок');
     if (!playerName) return;
     
-    connectWebSocket();
-    ws.onopen = () => {
-        ws.send(JSON.stringify({ type: 'join_room', roomId: roomId, playerName: playerName }));
-    };
+    try {
+        const response = await fetch('/api/join', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                roomId: roomId,
+                playerName: playerName
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            currentRoomId = roomId;
+            currentPlayerId = data.playerId;
+            currentBoard = data.board;
+            currentPlayers = data.players;
+            
+            document.getElementById('roomCode').textContent = currentRoomId;
+            document.getElementById('roomPanel').classList.remove('hidden');
+            document.getElementById('mainMenu').classList.add('hidden');
+            renderGrid();
+            showMessage('Вы присоединились к комнате!');
+            
+            // Запускаем синхронизацию
+            if (syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(syncWithServer, 1000);
+        } else {
+            showMessage(data.error || 'Не удалось присоединиться', true);
+        }
+    } catch (err) {
+        showMessage('Ошибка соединения с сервером', true);
+    }
 }
 
-function leaveRoom() {
-    if (ws) ws.send(JSON.stringify({ type: 'leave_room' }));
-    if (ws) ws.close();
+async function leaveRoom() {
+    if (currentRoomId && currentPlayerId) {
+        try {
+            await fetch('/api/leave', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    roomId: currentRoomId,
+                    playerId: currentPlayerId
+                })
+            });
+        } catch (err) {}
+    }
+    
+    if (syncInterval) clearInterval(syncInterval);
+    
     currentRoomId = null;
     currentPlayerId = null;
     currentPlayers = [];
@@ -236,9 +277,8 @@ function copyRoomCode() {
 }
 
 function newGame() {
-    if (currentRoomId && ws) {
-        const newBoard = generateRandomBoard();
-        ws.send(JSON.stringify({ type: 'new_board', board: newBoard }));
+    if (currentRoomId) {
+        showMessage('В режиме комнаты новое поле создает создатель комнаты', true);
     } else {
         if (confirm('Создать новое поле?')) {
             currentBoard = generateRandomBoard();
@@ -249,8 +289,8 @@ function newGame() {
 }
 
 function resetProgress() {
-    if (currentRoomId && ws) {
-        ws.send(JSON.stringify({ type: 'reset_game' }));
+    if (currentRoomId) {
+        showMessage('В режиме комнаты сброс прогресса недоступен', true);
     } else if (confirm('Сбросить все отметки?')) {
         currentBoard = generateRandomBoard();
         renderGrid();
