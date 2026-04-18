@@ -194,6 +194,19 @@ body {
     }
 }
 
+.hidden {
+    display: none !important;
+}
+
+@keyframes flash {
+    0% { background: #ff8c42; }
+    100% { background: #3a3a5a; }
+}
+
+.cell-updated {
+    animation: flash 0.5s ease;
+}
+
 @media (max-width: 768px) {
     body {
         padding: 1rem;
