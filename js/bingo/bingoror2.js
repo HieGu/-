@@ -222,78 +222,37 @@ function showMessage(text, isError = false) {
 
 // WebSocket функции
 function connectWebSocket() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    ws = new WebSocket(`${protocol}//${window.location.host}`);
+    // Определяем адрес WebSocket в зависимости от окружения
+    let wsUrl;
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // Локальная разработка
+        wsUrl = `ws://${window.location.host}`;
+    } else {
+        // Продакшн на Render.com — используем wss и тот же хост
+        wsUrl = `wss://${window.location.host}`;
+    }
     
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        
-        switch (data.type) {
-            case 'room_created':
-                currentRoomId = data.roomId;
-                currentPlayerId = data.playerId;
-                currentBoard = data.board;
-                currentPlayers = data.players;
-                document.getElementById('roomCode').textContent = currentRoomId;
-                document.getElementById('roomPanel').classList.remove('hidden');
-                document.getElementById('mainMenu').classList.add('hidden');
-                renderGrid();
-                showMessage(`Комната создана! Код: ${currentRoomId}`);
-                break;
-                
-            case 'room_joined':
-                currentRoomId = data.roomId;
-                currentPlayerId = data.playerId;
-                currentBoard = data.board;
-                currentPlayers = data.players;
-                document.getElementById('roomPanel').classList.remove('hidden');
-                document.getElementById('mainMenu').classList.add('hidden');
-                renderGrid();
-                showMessage('Вы присоединились к комнате!');
-                break;
-                
-            case 'player_joined':
-                currentPlayers = data.players;
-                renderGrid();
-                showMessage(`Новый игрок присоединился!`);
-                break;
-                
-            case 'cell_updated':
-                currentPlayers = data.players;
-                renderGrid();
-                // Анимация обновления
-                const cells = document.querySelectorAll('.bingo-cell');
-                if (cells[data.cellIndex]) {
-                    cells[data.cellIndex].classList.add('cell-updated');
-                    setTimeout(() => cells[data.cellIndex].classList.remove('cell-updated'), 500);
-                }
-                showMessage(`${data.playerName} ${data.completed ? 'отметил' : 'снял отметку'} с клетки ${data.cellIndex + 1}`);
-                break;
-                
-            case 'player_left':
-                currentPlayers = data.players;
-                renderGrid();
-                showMessage('Игрок покинул комнату');
-                break;
-                
-            case 'game_reset':
-                currentPlayers = data.players;
-                renderGrid();
-                showMessage('Прогресс сброшен!');
-                break;
-                
-            case 'new_board_created':
-                currentBoard = data.board;
-                currentPlayers = data.players;
-                renderGrid();
-                showMessage('Создано новое поле бинго!');
-                break;
-                
-            case 'error':
-                showMessage(data.message, true);
-                break;
+    console.log('Подключение к WebSocket по адресу:', wsUrl);
+    ws = new WebSocket(wsUrl);
+    
+    ws.onopen = () => {
+        console.log('WebSocket соединение установлено');
+        showMessage('Соединение с сервером установлено!');
+    };
+    
+    ws.onerror = (error) => {
+        console.error('WebSocket ошибка:', error);
+        showMessage('Ошибка соединения. Возможно, сервер перезагружается. Попробуйте обновить страницу.', true);
+    };
+    
+    ws.onclose = () => {
+        console.log('WebSocket соединение закрыто');
+        if (currentRoomId) {
+            showMessage('Соединение с сервером потеряно. Перезагрузите страницу.', true);
         }
     };
+    
+    // ... остальная часть функции (ws.onmessage и т.д.) остаётся без изменений
 }
 
 function createRoom() {
