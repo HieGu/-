@@ -11,18 +11,233 @@
     <link rel="manifest" href="../../icon/site.webmanifest">
     
     <link rel="stylesheet" href="../../css/bingo/stylebingoror2.css">
+    
+    <style>
+        /* Дополнительные стили для лобби */
+        .lobby-container {
+            background: #2a2a4a;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .room-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .room-input {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .room-input input {
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            border: none;
+            background: #3a3a5a;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            width: 130px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        .room-input input:focus {
+            outline: none;
+            border: 2px solid #ff8c42;
+            background: #4a4a6a;
+        }
+        
+        .room-code {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff8c42;
+            background: #1a1a2e;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            display: inline-block;
+            margin: 0.5rem 0;
+            font-family: monospace;
+            letter-spacing: 5px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        
+        .small-btn {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+            background: #4a4a6a;
+        }
+        
+        .players-list {
+            background: #1a1a2e;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .players-list strong {
+            color: #ff8c42;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        
+        .player-tag {
+            display: inline-block;
+            padding: 0.3rem 0.7rem;
+            border-radius: 1rem;
+            margin: 0.2rem;
+            font-size: 0.8rem;
+            background: #3a3a5a;
+        }
+        
+        .player-tag.you {
+            background: #ff8c42;
+            color: white;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Стили для маркеров игроков */
+        .player-markers {
+            display: flex;
+            gap: 0.2rem;
+            margin-top: 0.3rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .marker {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        
+        .btn:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #4a4a6a;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a5a7a;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .bingo-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #ff6b6b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .stats {
+            background: #2a2a4a;
+            padding: 1rem;
+            border-radius: 1rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .stats h3 {
+            color: #ff6b6b;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .line-stat {
+            background: #3a3a5a;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+        
+        @media (max-width: 700px) {
+            .room-controls {
+                flex-direction: column;
+            }
+            .room-input {
+                width: 100%;
+                justify-content: center;
+            }
+            .room-code {
+                font-size: 1.5rem;
+                letter-spacing: 3px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="bingo-container">
         <a href="../../index.html" class="back-btn">← Назад к играм</a>
         
+        <!-- Лобби для создания/присоединения к комнате -->
         <div class="lobby-container">
             <div id="mainMenu">
                 <div class="room-controls">
-                    <button class="btn" id="createRoomBtn">Создать комнату</button>
+                    <button class="btn" id="createRoomBtn"> Создать комнату</button>
                     <div class="room-input">
-                        <input type="text" id="roomIdInput" placeholder="Код" maxlength="4" style="text-transform:uppercase">
-                        <button class="btn btn-secondary" id="joinRoomBtn">Присоединиться</button>
+                        <input type="text" id="roomIdInput" placeholder="Код комнаты" maxlength="4" style="text-transform:uppercase">
+                        <button class="btn btn-secondary" id="joinRoomBtn"> Присоединиться</button>
                     </div>
                 </div>
             </div>
@@ -31,8 +246,8 @@
                 <div style="text-align: center;">
                     <div class="room-code" id="roomCode"></div>
                     <div class="button-group">
-                        <button class="btn small-btn" id="copyCodeBtn">Копировать код</button>
-                        <button class="btn small-btn btn-secondary" id="leaveRoomBtn">Покинуть комнату</button>
+                        <button class="btn small-btn" id="copyCodeBtn"> Копировать код</button>
+                        <button class="btn small-btn btn-secondary" id="leaveRoomBtn">🚪 Покинуть комнату</button>
                     </div>
                 </div>
                 <div class="players-list" id="playersList"></div>
@@ -40,19 +255,19 @@
         </div>
         
         <div class="header">
-            <h1>RISK OF RAIN 2 BINGO</h1>
+            <h1> RISK OF RAIN 2 BINGO</h1>
             <p>Зачеркивай испытания - всё синхронизируется!</p>
         </div>
 
         <div class="controls">
-            <button class="btn" id="newGameBtn">Новая игра</button>
-            <button class="btn btn-secondary" id="resetProgressBtn">Сбросить прогресс</button>
+            <button class="btn" id="newGameBtn"> Новая игра</button>
+            <button class="btn btn-secondary" id="resetProgressBtn"> Сбросить прогресс</button>
         </div>
 
         <div class="bingo-grid" id="bingoGrid"></div>
 
         <div class="stats">
-            <h3>Бинго линии</h3>
+            <h3> Бинго линии</h3>
             <div class="bingo-lines" id="bingoLines"></div>
         </div>
     </div>
