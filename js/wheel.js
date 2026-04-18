@@ -1,393 +1,425 @@
-// Универсальный модуль для работы колеса и истории (localStorage)
+// Список испытаний
+const challenges = [
+    "Три раза подряд потерпите неудачу в Святилище Удачи",
+    "Иметь при себе три разных активки",
+    "Найти Аспект",
+    "Выбить предмет с босса",
+    "Найти потайную комнату в Заброшенном акведуке",
+    "Иметь при себе 6 турелей",
+    "Заскрапить 6 турелей/дронов в одном утилизаторе дронов",
+    "Вернуться на первый этап",
+    "Взять два предмета 'Формованное стекло'",
+    "Взять 5 предметов синего качества",
+    "Собрать в забеге 2 одинаковых красных предмета",
+    "Приготовить у повара 10 предметов",
+    "Сделать скрап каждой категории",
+    "Приготовить блюдо",
+    "Уничтожить себя у Обелиска",
+    "Открыть защитный сундук с таймером на месте сбора 'Дельта'",
+    "Умереть два раза за один забег",
+    "Победите уникального стража Позолоченного берега",
+    "Победить Ложного сына",
+    "Улучшить Святилище Лесов до предела",
+    "Соберите 5 разных дронов",
+    "Победите Ложного сына, Сердце Сола, Митрикса и Пустотника за один забег",
+    "Победить Сердце Сола",
+    "Победить Митрикса",
+    "Победить Пустотника",
+    "На каждой локации найти алтарь Тритонов и нажать его",
+    "Пройти Поля Пустоты",
+    "Попасть в Межвременной базар",
+    "Попасть в Целостное мгновение",
+    "Иметь при себе 5 одинаковых дронов",
+    "Пройти игру с артефактом возмездия (Vengeance)",
+    "Пройти игру с артефактом эволюции (Evolution)",
+    "Пройти игру с артефактом чести (Honor)",
+    "Пройти игру с артефактом тайны (Enigma)",
+    "Пройти игру с артефактом изменения (Metamorphosis)",
+    "Пройти игру с артефактом престижа (Prestige)"
+];
 
-let spinning = false;
-let animationId = null;
-let currentRotation = 0;
-let targetRotation = 0;
-let spinStartTime = 0;
-let spinDuration = 2000; // 2 секунды вращения
+const GRID_SIZE = 5;
+const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
 
-function initWheel(wheelsArray, gameKey) {
-    let currentWheelIndex = 0;
-    let spinCount = 0;
-    let history = [];
-    let canvas = document.getElementById('wheelCanvas');
-    let ctx = canvas ? canvas.getContext('2d') : null;
-    
-    // Размер canvas
-    let size = 500;
-    if (canvas) {
-        canvas.width = size;
-        canvas.height = size;
+// Цвета игроков
+const playerColors = [
+    { bg: '#ff6b6b', name: 'Красный' },
+    { bg: '#4ecdc4', name: 'Бирюзовый' },
+    { bg: '#ffe66d', name: 'Желтый' },
+    { bg: '#a8e6cf', name: 'Зеленый' },
+    { bg: '#ff8c94', name: 'Розовый' }
+];
+
+// Состояние игры
+let currentBoard = [];
+let currentPlayers = [];
+let currentPlayerId = null;
+let currentRoomId = null;
+let currentPlayerColor = null;
+let syncInterval = null;
+
+// Генерация случайного поля
+function generateRandomBoard() {
+    const shuffled = [...challenges];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    
-    let centerX = size / 2;
-    let centerY = size / 2;
-    let radius = size / 2 - 10;
-    
-    const wheelSelect = document.getElementById('wheelSelect');
-    const spinBtn = document.getElementById('spinBtn');
-    const resultSpan = document.getElementById('result');
-    const countSpan = document.getElementById('count');
-    const historyList = document.getElementById('historyList');
-    const clearBtn = document.getElementById('clearHistoryBtn');
-
-    // Новая палитра однотонных, но различимых цветов (пастельные тона)
-    const colors = [
-        '#FFB3BA', // пастельный розовый
-        '#B5EAD7', // пастельный зеленый
-        '#FFDAC1', // пастельный оранжевый
-        '#E2F0CB', // пастельный салатовый
-        '#B5E3FF', // пастельный голубой
-        '#FFC8DD', // пастельный розовый
-        '#C7E9FB', // пастельный синий
-        '#FFF5BA', // пастельный желтый
-        '#D4B8D4', // пастельный фиолетовый
-        '#FFB7B2', // пастельный коралловый
-        '#B5E3D6', // пастельный мятный
-        '#FFD6B5', // пастельный персиковый
-        '#C5E0D4', // пастельный мятный
-        '#FFC7C7', // пастельный красный
-        '#E0D4FF', // пастельный лавандовый
-        '#FFDFBF', // пастельный абрикосовый
-        '#BDE0FE', // пастельный голубой
-        '#FBC8B5', // пастельный лососевый
-        '#C1E1C1', // пастельный зеленый
-        '#FFB5A7'  // пастельный коралловый
-    ];
-
-    // Загрузка данных из localStorage
-    function loadData() {
-        const saved = localStorage.getItem(`wheel_${gameKey}`);
-        if (saved) {
-            try {
-                const data = JSON.parse(saved);
-                spinCount = data.spinCount || 0;
-                history = data.history || [];
-                currentWheelIndex = data.currentWheelIndex || 0;
-                if (wheelSelect) wheelSelect.value = currentWheelIndex;
-            } catch(e) {}
-        }
-        updateUI();
-        drawWheel();
+    currentBoard = shuffled.slice(0, TOTAL_CELLS);
+    while (currentBoard.length < TOTAL_CELLS) {
+        currentBoard.push("Дополнительное испытание");
     }
+    return currentBoard;
+}
 
-    function saveData() {
-        const data = {
-            spinCount: spinCount,
-            history: history,
-            currentWheelIndex: currentWheelIndex
-        };
-        localStorage.setItem(`wheel_${gameKey}`, JSON.stringify(data));
-    }
-
-    function updateUI() {
-        countSpan.textContent = spinCount;
-        renderHistory();
-    }
-
-    function renderHistory() {
-        if (!historyList) return;
-        historyList.innerHTML = '';
-        const recent = [...history].reverse().slice(0, 20);
-        recent.forEach(item => {
-            const li = document.createElement('li');
-            li.textContent = `${item.item} (${item.wheelName})`;
-            historyList.appendChild(li);
-        });
-    }
-
-    function addToHistory(item, wheelName) {
-        history.push({
-            item: item,
-            wheelName: wheelName,
-            timestamp: Date.now()
-        });
-        if (history.length > 100) history.shift();
-        saveData();
-        updateUI();
-    }
-
-    function getCurrentWheelItems() {
-        const idx = wheelSelect ? parseInt(wheelSelect.value) : currentWheelIndex;
-        if (isNaN(idx)) return [];
-        return wheelsArray[idx] || [];
-    }
-
-    function getCurrentWheelName() {
-        const idx = wheelSelect ? parseInt(wheelSelect.value) : currentWheelIndex;
-        if (wheelSelect && wheelSelect.options[idx]) {
-            return wheelSelect.options[idx].text;
-        }
-        return `Колесо ${idx+1}`;
-    }
-
-    // Улучшенная функция определения выбранного элемента по углу вращения
-    function getSelectedItem(rotation) {
-        const items = getCurrentWheelItems();
-        if (items.length === 0) return null;
-        
-        const angleStep = (Math.PI * 2) / items.length;
-        
-        // Указатель находится сверху (12 часов) - угол -90 градусов или 270 градусов в радианах
-        const pointerAngle = -Math.PI / 2; // -90 градусов
-        
-        // Получаем угол, на который повернуто колесо
-        let wheelRotation = rotation % (Math.PI * 2);
-        
-        // Вычисляем, какой сегмент находится под указателем
-        let segmentAngle = (pointerAngle - wheelRotation + Math.PI * 2) % (Math.PI * 2);
-        
-        // Определяем индекс сегмента
-        let selectedIndex = Math.floor(segmentAngle / angleStep);
-        
-        // Проверка на граничные случаи
-        if (segmentAngle % angleStep < 0.01) {
-            selectedIndex = (selectedIndex - 1 + items.length) % items.length;
-        }
-        
-        selectedIndex = Math.max(0, Math.min(items.length - 1, selectedIndex));
-        
-        return {
-            index: selectedIndex,
-            item: items[selectedIndex],
-            angle: segmentAngle,
-            step: angleStep
-        };
-    }
-
-    // Отрисовка колеса с однотонными сегментами
-    function drawWheel() {
-        if (!ctx) return;
-        
-        const items = getCurrentWheelItems();
-        if (items.length === 0) {
-            ctx.clearRect(0, 0, size, size);
-            ctx.fillStyle = '#f0e0c0';
-            ctx.fillRect(0, 0, size, size);
-            ctx.fillStyle = '#666';
-            ctx.font = '20px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Нет данных', centerX, centerY);
-            return;
-        }
-        
-        const angleStep = (Math.PI * 2) / items.length;
-        
-        ctx.clearRect(0, 0, size, size);
-        
-        // Рисуем сегменты
-        for (let i = 0; i < items.length; i++) {
-            const startAngle = i * angleStep + currentRotation;
-            const endAngle = (i + 1) * angleStep + currentRotation;
-            
-            // Рисуем сегмент
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-            ctx.closePath();
-            
-            // Однотонные цвета
-            ctx.fillStyle = colors[i % colors.length];
-            ctx.fill();
-            
-            // Черная обводка для четкого разделения
-            ctx.strokeStyle = '#2c3e50';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            // Рисуем разделительные линии (белые)
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, startAngle, startAngle);
-            ctx.lineTo(centerX, centerY);
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-        }
-        
-        // Рисуем текст на сегментах
-        for (let i = 0; i < items.length; i++) {
-            const startAngle = i * angleStep + currentRotation;
-            const midAngle = startAngle + angleStep / 2;
-            
-            ctx.save();
-            ctx.translate(centerX, centerY);
-            ctx.rotate(midAngle);
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            
-            let text = items[i];
-            // Укорачиваем текст если слишком длинный
-            if (text.length > 18) {
-                text = text.substring(0, 15) + '...';
+// Проверка линий для игрока
+function checkBingoLinesForPlayer(completedCells) {
+    const lines = [];
+    for (let row = 0; row < GRID_SIZE; row++) {
+        let completed = true;
+        for (let col = 0; col < GRID_SIZE; col++) {
+            if (!completedCells[row * GRID_SIZE + col]) {
+                completed = false;
+                break;
             }
-            
-            ctx.font = "bold 13px 'Segoe UI', Arial";
-            ctx.fillStyle = "#2c3e50"; // Темный текст для читаемости
-            ctx.shadowBlur = 0;
-            
-            // Добавляем белую обводку для лучшей читаемости
-            ctx.shadowColor = 'white';
-            ctx.shadowBlur = 3;
-            ctx.fillText(text, radius * 0.7, 4);
-            ctx.shadowBlur = 0;
-            ctx.fillText(text, radius * 0.7, 4);
-            ctx.restore();
+        }
+        lines.push(completed);
+    }
+    for (let col = 0; col < GRID_SIZE; col++) {
+        let completed = true;
+        for (let row = 0; row < GRID_SIZE; row++) {
+            if (!completedCells[row * GRID_SIZE + col]) {
+                completed = false;
+                break;
+            }
+        }
+        lines.push(completed);
+    }
+    let mainDiagonal = true;
+    for (let i = 0; i < GRID_SIZE; i++) {
+        if (!completedCells[i * GRID_SIZE + i]) {
+            mainDiagonal = false;
+            break;
+        }
+    }
+    lines.push(mainDiagonal);
+    let secondaryDiagonal = true;
+    for (let i = 0; i < GRID_SIZE; i++) {
+        if (!completedCells[i * GRID_SIZE + (GRID_SIZE - 1 - i)]) {
+            secondaryDiagonal = false;
+            break;
+        }
+    }
+    lines.push(secondaryDiagonal);
+    return lines.filter(l => l === true).length;
+}
+
+function renderGrid() {
+    const grid = document.getElementById('bingoGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    
+    for (let i = 0; i < TOTAL_CELLS; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'bingo-cell';
+        
+        // Отмечаем, если текущий игрок отметил клетку
+        const myPlayer = currentPlayers.find(p => p.id === currentPlayerId);
+        if (myPlayer && myPlayer.completedCells[i]) {
+            cell.classList.add('completed');
+            cell.style.borderColor = myPlayer.color;
         }
         
-        // Рисуем центральный круг
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, 25, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-        ctx.strokeStyle = '#d98c2b';
-        ctx.lineWidth = 4;
-        ctx.stroke();
+        cell.innerHTML = `
+            <div class="cell-number">${i + 1}</div>
+            <div class="cell-text">${currentBoard[i] || 'Загрузка...'}</div>
+            <div class="player-markers" id="markers-${i}"></div>
+        `;
         
-        // Центральная иконка
-        ctx.fillStyle = '#d98c2b';
-        ctx.font = 'bold 28px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('🎲', centerX, centerY);
+        cell.addEventListener('click', () => toggleCell(i));
+        grid.appendChild(cell);
         
-        // Внутреннее кольцо для красоты
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
-        ctx.strokeStyle = '#d98c2b';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        // Подсветка выбранного сектора (только когда не крутится)
-        if (!spinning) {
-            const selected = getSelectedItem(currentRotation);
-            if (selected && selected.index !== undefined) {
-                const startAngle = selected.index * angleStep + currentRotation;
-                const endAngle = (selected.index + 1) * angleStep + currentRotation;
-                
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.arc(centerX, centerY, radius + 3, startAngle, endAngle);
-                ctx.closePath();
-                ctx.strokeStyle = '#FFD700';
-                ctx.lineWidth = 4;
-                ctx.stroke();
-                
-                // Добавляем свечение
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#FFD700';
-                ctx.stroke();
-                ctx.shadowBlur = 0;
+        // Добавляем маркеры игроков
+        const markersContainer = document.getElementById(`markers-${i}`);
+        if (markersContainer) {
+            for (const player of currentPlayers) {
+                if (player.completedCells[i]) {
+                    const marker = document.createElement('div');
+                    marker.className = 'marker';
+                    marker.style.background = player.color;
+                    marker.title = `${player.name} отметил`;
+                    marker.textContent = '✓';
+                    markersContainer.appendChild(marker);
+                }
             }
         }
     }
     
-    // Анимация вращения
-    function animateSpin(now) {
-        const elapsed = now - spinStartTime;
-        const progress = Math.min(1, elapsed / spinDuration);
-        
-        // EasyOutCubic анимация
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        
-        const currentRotationTarget = targetRotation * easeOut;
-        currentRotation = currentRotationTarget;
-        
-        drawWheel();
-        
-        if (progress < 1) {
-            animationId = requestAnimationFrame(animateSpin);
-        } else {
-            // Анимация завершена
-            spinning = false;
-            animationId = null;
-            
-            // Получаем выбранный элемент
-            const selected = getSelectedItem(currentRotation);
-            
-            if (selected && selected.item) {
-                const wheelName = getCurrentWheelName();
-                
-                // Обновляем текстовый результат
-                resultSpan.textContent = selected.item;
-                
-                // Сохраняем в историю
-                spinCount++;
-                addToHistory(selected.item, wheelName);
-                
-                // Визуальная обратная связь
-                resultSpan.style.transform = 'scale(1.1)';
-                setTimeout(() => {
-                    resultSpan.style.transform = 'scale(1)';
-                }, 200);
-                
-                // Перерисовываем с подсветкой
-                drawWheel();
-                
-                console.log(`🎡 Выпало: ${selected.item}`);
-            } else {
-                console.error('❌ Не удалось определить результат');
-                resultSpan.textContent = "Ошибка!";
+    // Обновляем информацию о линиях для текущего игрока
+    if (myPlayer) {
+        const linesCount = checkBingoLinesForPlayer(myPlayer.completedCells);
+        const linesContainer = document.getElementById('bingoLines');
+        if (linesContainer) {
+            linesContainer.innerHTML = `<div class="line-stat">Собрано линий: ${linesCount}</div>`;
+            if (linesCount >= 5) {
+                showMessage(`🎉 Бинго! ${myPlayer.name} собрал ${linesCount} линий! 🎉`);
             }
-            
-            spinBtn.disabled = false;
-            if (wheelSelect) wheelSelect.disabled = false;
         }
     }
     
-    function spin() {
-        if (spinning) return;
-        
-        const items = getCurrentWheelItems();
-        if (items.length === 0) {
-            resultSpan.textContent = "Нет элементов!";
-            return;
-        }
-        
-        spinning = true;
-        spinBtn.disabled = true;
-        if (wheelSelect) wheelSelect.disabled = true;
-        
-        // Случайное количество полных оборотов
-        const fullRotations = (Math.random() * 15 + 15) * Math.PI * 2;
-        const randomOffset = Math.random() * Math.PI * 2;
-        targetRotation = currentRotation + fullRotations + randomOffset;
-        
-        spinStartTime = performance.now();
-        animationId = requestAnimationFrame(animateSpin);
-    }
+    updatePlayersDisplay();
+}
+
+function toggleCell(index) {
+    if (!currentRoomId || !currentPlayerId) return;
     
-    function clearHistory() {
-        if (confirm('Очистить всю историю выпадений?')) {
-            history = [];
-            spinCount = 0;
-            saveData();
-            updateUI();
-            resultSpan.textContent = '—';
-            drawWheel();
-        }
-    }
-    
-    // Event Listeners
-    if (spinBtn) spinBtn.addEventListener('click', spin);
-    if (clearBtn) clearBtn.addEventListener('click', clearHistory);
-    if (wheelSelect) {
-        wheelSelect.addEventListener('change', () => {
-            currentWheelIndex = parseInt(wheelSelect.value);
-            drawWheel();
-            saveData();
-            resultSpan.textContent = '—';
-        });
-    }
-    
-    if (canvas) {
-        canvas.addEventListener('click', spin);
-    }
-    
-    loadData();
-    
-    if (history.length > 0 && resultSpan.textContent === '—') {
-        resultSpan.textContent = history[history.length-1].item;
+    const myPlayer = currentPlayers.find(p => p.id === currentPlayerId);
+    if (myPlayer) {
+        myPlayer.completedCells[index] = !myPlayer.completedCells[index];
+        sendUpdateToServer();
+        renderGrid();
     }
 }
+
+function updatePlayersDisplay() {
+    const container = document.getElementById('playersList');
+    if (!container) return;
+    
+    container.innerHTML = '<strong>Игроки:</strong><br>';
+    for (const player of currentPlayers) {
+        const completedCount = player.completedCells.filter(c => c === true).length;
+        const linesCount = checkBingoLinesForPlayer(player.completedCells);
+        container.innerHTML += `
+            <div class="player-tag" style="background: ${player.color}; ${player.id === currentPlayerId ? 'border: 2px solid white;' : ''}">
+                ${player.name} ${player.id === currentPlayerId ? '(вы)' : ''}
+                (${completedCount}/25, ${linesCount} линий)
+            </div>
+        `;
+    }
+}
+
+async function sendUpdateToServer() {
+    if (!currentRoomId || !currentPlayerId) return;
+    
+    try {
+        const response = await fetch('/api/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                roomId: currentRoomId,
+                playerId: currentPlayerId,
+                completedCells: currentPlayers.find(p => p.id === currentPlayerId).completedCells
+            })
+        });
+        await response.json();
+    } catch (err) {
+        console.error('Ошибка отправки:', err);
+    }
+}
+
+async function syncWithServer() {
+    if (!currentRoomId) return;
+    
+    try {
+        const response = await fetch(`/api/sync/${currentRoomId}`);
+        const data = await response.json();
+        if (data.success) {
+            currentPlayers = data.players;
+            currentBoard = data.board;
+            renderGrid();
+        }
+    } catch (err) {
+        console.error('Ошибка синхронизации:', err);
+    }
+}
+
+async function createRoom() {
+    const playerName = prompt('Введите ваше имя:', 'Игрок');
+    if (!playerName) return;
+    
+    const colorIndex = currentPlayers.length % playerColors.length;
+    const playerColor = playerColors[colorIndex].bg;
+    
+    const newBoard = generateRandomBoard();
+    
+    try {
+        const response = await fetch('/api/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                playerName: playerName,
+                board: newBoard,
+                color: playerColor
+            })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            currentRoomId = data.roomId;
+            currentPlayerId = data.playerId;
+            currentPlayerColor = playerColor;
+            currentBoard = newBoard;
+            currentPlayers = [{ id: currentPlayerId, name: playerName, completedCells: new Array(25).fill(false), color: playerColor }];
+            
+            document.getElementById('roomCode').textContent = currentRoomId;
+            document.getElementById('roomPanel').classList.remove('hidden');
+            document.getElementById('mainMenu').classList.add('hidden');
+            renderGrid();
+            showMessage(`Комната создана! Код: ${currentRoomId}`);
+            
+            // Запускаем синхронизацию
+            if (syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(syncWithServer, 2000);
+        }
+    } catch (err) {
+        showMessage('Ошибка создания комнаты', true);
+    }
+}
+
+async function joinRoom() {
+    const roomId = document.getElementById('roomIdInput').value.toUpperCase();
+    if (!roomId) {
+        showMessage('Введите код комнаты', true);
+        return;
+    }
+    
+    const playerName = prompt('Введите ваше имя:', 'Игрок');
+    if (!playerName) return;
+    
+    try {
+        const response = await fetch('/api/join', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                roomId: roomId,
+                playerName: playerName,
+                color: playerColors[1].bg
+            })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            currentRoomId = roomId;
+            currentPlayerId = data.playerId;
+            currentBoard = data.board;
+            currentPlayers = data.players;
+            
+            document.getElementById('roomCode').textContent = currentRoomId;
+            document.getElementById('roomPanel').classList.remove('hidden');
+            document.getElementById('mainMenu').classList.add('hidden');
+            renderGrid();
+            showMessage('Вы присоединились к комнате!');
+            
+            // Запускаем синхронизацию
+            if (syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(syncWithServer, 2000);
+        } else {
+            showMessage(data.error || 'Не удалось присоединиться', true);
+        }
+    } catch (err) {
+        showMessage('Ошибка подключения к комнате', true);
+    }
+}
+
+async function leaveRoom() {
+    if (currentRoomId && currentPlayerId) {
+        try {
+            await fetch('/api/leave', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    roomId: currentRoomId,
+                    playerId: currentPlayerId
+                })
+            });
+        } catch (err) {}
+    }
+    
+    if (syncInterval) clearInterval(syncInterval);
+    currentRoomId = null;
+    currentPlayerId = null;
+    currentPlayers = [];
+    document.getElementById('roomPanel').classList.add('hidden');
+    document.getElementById('mainMenu').classList.remove('hidden');
+    currentBoard = generateRandomBoard();
+    renderGrid();
+}
+
+function copyRoomCode() {
+    const code = document.getElementById('roomCode').textContent;
+    navigator.clipboard.writeText(code);
+    showMessage('Код скопирован!');
+}
+
+let roomCodeHidden = false;
+function hideCode() {
+    const codeElement = document.getElementById('roomCode');
+    if (roomCodeHidden) {
+        codeElement.textContent = currentRoomId;
+        roomCodeHidden = false;
+    } else {
+        codeElement.textContent = '••••••';
+        roomCodeHidden = true;
+    }
+}
+
+function newGame() {
+    if (currentRoomId) {
+        showMessage('В режиме комнаты новое поле создает создатель комнаты', true);
+    } else {
+        if (confirm('Создать новое поле?')) {
+            currentBoard = generateRandomBoard();
+            renderGrid();
+            showMessage('Создано новое поле!');
+        }
+    }
+}
+
+function resetProgress() {
+    if (currentRoomId) {
+        showMessage('В режиме комнаты прогресс сбрасывается индивидуально', true);
+    } else if (confirm('Сбросить все отметки?')) {
+        // В одиночном режиме просто пересоздаем поле
+        currentBoard = generateRandomBoard();
+        renderGrid();
+        showMessage('Прогресс сброшен!');
+    }
+}
+
+function showMessage(text, isError = false) {
+    const message = document.createElement('div');
+    message.className = 'message';
+    message.textContent = text;
+    message.style.background = isError ? '#ff4444' : '#ff8c42';
+    document.body.appendChild(message);
+    setTimeout(() => message.remove(), 3000);
+}
+
+// Оффлайн режим
+function initOffline() {
+    const savedBoard = localStorage.getItem('ror2_bingo_board');
+    if (savedBoard) {
+        currentBoard = JSON.parse(savedBoard);
+    } else {
+        currentBoard = generateRandomBoard();
+    }
+    renderGrid();
+}
+
+// Инициализация
+function init() {
+    document.getElementById('roomPanel').classList.add('hidden');
+    document.getElementById('mainMenu').classList.remove('hidden');
+    
+    initOffline();
+    
+    document.getElementById('newGameBtn').addEventListener('click', newGame);
+    document.getElementById('resetProgressBtn').addEventListener('click', resetProgress);
+    document.getElementById('createRoomBtn').addEventListener('click', createRoom);
+    document.getElementById('joinRoomBtn').addEventListener('click', joinRoom);
+    document.getElementById('leaveRoomBtn').addEventListener('click', leaveRoom);
+    document.getElementById('copyCodeBtn').addEventListener('click', copyRoomCode);
+    document.getElementById('hideCodeBtn').addEventListener('click', hideCode);
+}
+
+init();
