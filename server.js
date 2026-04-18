@@ -18,11 +18,10 @@ const mimeTypes = {
 };
 
 const server = http.createServer((req, res) => {
-    let filePath = '.' + req.url;
+    console.log(`Запрос: ${req.method} ${req.url}`);
     
-    if (filePath === './') {
-        filePath = './index.html';
-    }
+    let filePath = '.' + req.url;
+    if (filePath === './') filePath = './index.html';
     
     const extname = String(path.extname(filePath)).toLowerCase();
     const contentType = mimeTypes[extname] || 'application/octet-stream';
@@ -43,25 +42,22 @@ const server = http.createServer((req, res) => {
     });
 });
 
-// WebSocket сервер
 const wss = new WebSocket.Server({ server });
 
-// Хранилище комнат
 const rooms = new Map();
 
 wss.on('connection', (ws) => {
-    console.log('🔌 Новое WebSocket соединение');
+    console.log('WebSocket соединение установлено');
     let currentRoom = null;
     let currentPlayerId = null;
 
     ws.on('message', (message) => {
         try {
             const data = JSON.parse(message);
-            console.log('📨 Получено:', data.type);
-
+            console.log('Получено:', data.type);
+            
             switch (data.type) {
                 case 'create_room':
-                    // Создаем комнату с уникальным 4-значным кодом
                     const roomId = Math.floor(1000 + Math.random() * 9000).toString();
                     const playerId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
                     
@@ -81,7 +77,7 @@ wss.on('connection', (ws) => {
                         board: data.board,
                         players: [{ id: playerId, name: data.playerName, completedCells: new Array(25).fill(false) }]
                     }));
-                    console.log(`✅ Комната создана: ${roomId}`);
+                    console.log(`Комната создана: ${roomId}`);
                     break;
                     
                 case 'join_room':
@@ -92,7 +88,6 @@ wss.on('connection', (ws) => {
                         currentRoom = data.roomId;
                         currentPlayerId = playerId;
                         
-                        // Отправляем новому игроку состояние
                         ws.send(JSON.stringify({
                             type: 'room_joined',
                             playerId: playerId,
@@ -100,7 +95,6 @@ wss.on('connection', (ws) => {
                             players: room.players.map(p => ({ id: p.id, name: p.name, completedCells: p.completedCells }))
                         }));
                         
-                        // Уведомляем первого игрока
                         const firstPlayer = room.players.find(p => p.id !== playerId);
                         if (firstPlayer && firstPlayer.ws.readyState === WebSocket.OPEN) {
                             firstPlayer.ws.send(JSON.stringify({
@@ -108,7 +102,7 @@ wss.on('connection', (ws) => {
                                 players: room.players.map(p => ({ id: p.id, name: p.name, completedCells: p.completedCells }))
                             }));
                         }
-                        console.log(`✅ Игрок ${data.playerName} присоединился к ${data.roomId}`);
+                        console.log(`Игрок ${data.playerName} присоединился к ${data.roomId}`);
                     } else {
                         ws.send(JSON.stringify({
                             type: 'error',
@@ -124,7 +118,6 @@ wss.on('connection', (ws) => {
                         if (player) {
                             player.completedCells[data.cellIndex] = data.completed;
                             
-                            // Отправляем обновление всем в комнате
                             roomData.players.forEach(p => {
                                 if (p.ws.readyState === WebSocket.OPEN) {
                                     p.ws.send(JSON.stringify({
@@ -230,6 +223,6 @@ wss.on('connection', (ws) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`✅ Сервер запущен на http://localhost:${PORT}`);
-    console.log(`🔌 WebSocket сервер готов`);
+    console.log(`Сервер запущен на порту ${PORT}`);
+    console.log(`http://localhost:${PORT}`);
 });

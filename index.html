@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Challenge Wheels - Выбор игры</title>
     
-    <!-- Иконки -->
     <link rel="apple-touch-icon" sizes="180x180" href="icon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="icon/favicon-16x16.png">
@@ -15,7 +14,6 @@
 </head>
 <body>
     <div class="main-layout">
-        <!-- Основной контент -->
         <main class="main-content">
             <div class="bento-grid">
                 <div class="bento-item header">
@@ -91,7 +89,6 @@
             </div>
         </main>
 
-        <!-- Правая фиксированная панель с рекламой -->
         <aside class="right-sidebar">
             <div class="ads-header">
                 <p>Сайт работает при помощи этих людей</p>
@@ -124,6 +121,85 @@
         </aside>
     </div>
 
+    <style>
+        .main-layout {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .main-content { flex: 1; max-width: 900px; }
+        .right-sidebar { width: 280px; flex-shrink: 0; }
+        
+        .ads-header {
+            text-align: center;
+            margin-bottom: 1.2rem;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 1rem;
+            border: 1px solid #ff8c42;
+        }
+        .ads-header p { color: #ff8c42; font-size: 0.95rem; margin: 0; }
+        .ads-header p:first-child { font-weight: bold; color: #ffaa55; font-size: 1rem; }
+        
+        .ads-container { position: sticky; top: 2rem; display: flex; flex-direction: column; gap: 1rem; }
+        .ad-fixed {
+            background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+            border: 1px solid #ff8c42;
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+        .ad-fixed:hover { transform: translateY(-4px); border-color: #ffaa55; }
+        .ad-link { text-decoration: none; color: inherit; display: block; padding: 1.2rem; }
+        .ad-content { text-align: center; }
+        .ad-text h4 { color: #ff8c42; margin-bottom: 0.3rem; font-size: 1.1rem; }
+        .ad-text p { color: #aaa; font-size: 0.75rem; margin-bottom: 0.8rem; }
+        .ad-button { display: inline-block; background: #ff8c42; color: white; padding: 0.3rem 0.8rem; border-radius: 2rem; font-size: 0.7rem; font-weight: bold; }
+        
+        .game-mode-buttons { display: flex; gap: 0.8rem; justify-content: center; margin-top: 1.2rem; flex-wrap: wrap; }
+        .mode-btn { margin-top: 0 !important; padding: 0.6rem 1.2rem !important; font-size: 0.9rem !important; }
+        .mode-btn:hover { transform: translateY(-2px); }
+        
+        @media (max-width: 1000px) {
+            .main-layout { flex-direction: column; align-items: center; }
+            .right-sidebar { width: 100%; max-width: 500px; }
+            .ads-container { position: static; flex-direction: row; }
+            .ad-fixed { flex: 1; }
+        }
+        @media (max-width: 700px) {
+            .main-layout { padding: 1rem; }
+            .ads-container { flex-direction: column; }
+        }
+    </style>
+
+    <script>
+        document.querySelectorAll('.game-btn').forEach(btn => {
+            if (btn.classList.contains('mode-btn')) return;
+            btn.addEventListener('click', (e) => {
+                const card = e.target.closest('.game-card');
+                const game = card.dataset.game;
+                if (game === 'sts2') {
+                    e.preventDefault();
+                    alert('Slay The Spire 2 временно в разработке! Скоро появится.');
+                    return;
+                }
+                window.location.href = `game/wheel/${game}.html`;
+            });
+        });
+        
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const game = btn.dataset.game;
+                if (game === 'ror2') window.location.href = 'game/wheel/ror2.html';
+                else if (game === 'ror2-bingo') window.location.href = 'game/bingo/ror2.html';
+            });
+        });
+    </script>
+</body>
+</html>
     <style>
         .main-layout {
             display: flex;
