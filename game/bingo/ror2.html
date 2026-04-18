@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk of Rain 2 - Bingo</title>
+    
+    <!-- Иконки -->
+    <link rel="apple-touch-icon" sizes="180x180" href="../../icon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../icon/favicon-16x16.png">
+    <link rel="manifest" href="../../icon/site.webmanifest">
+    
+    <!-- Подключаем отдельный файл стилей для бинго -->
+    <link rel="stylesheet" href="../../css/bingo/stylebingoror2.css">
+</head>
+<body>
+    <div class="bingo-container">
+        <a href="../../index.html" class="back-btn">← Назад к играм</a>
+        
+        <div class="header">
+            <h1>RISK OF RAIN 2 BINGO</h1>
+            <p>Зачеркивай испытания по мере выполнения! Собери 5 в ряд, столбец или диагональ.</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="newGameBtn">Новая игра</button>
+            <button class="btn btn-secondary" id="resetProgressBtn">Сбросить прогресс</button>
+        </div>
+
+        <div class="bingo-grid" id="bingoGrid"></div>
+
+        <div class="stats">
+            <h3>Бинго линии</h3>
+            <div class="bingo-lines" id="bingoLines"></div>
+        </div>
+    </div>
+
+    <!-- Подключаем отдельный файл скрипта для бинго -->
+    <script src="../../js/bingo/bingoror2.js"></script>
+</body>
+</html>
