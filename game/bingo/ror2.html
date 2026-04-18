@@ -11,99 +11,6 @@
     <link rel="manifest" href="../../icon/site.webmanifest">
     
     <link rel="stylesheet" href="../../css/bingo/stylebingoror2.css">
-    
-    <style>
-        .bottom-ads {
-            max-width: 900px;
-            margin: 2rem auto 0 auto;
-            padding: 1rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .ads-header {
-            text-align: center;
-            margin-bottom: 1rem;
-            padding: 0.5rem;
-        }
-        
-        .ads-header p {
-            color: #ff8c42;
-            font-size: 0.9rem;
-            margin: 0;
-        }
-        
-        .ads-header p:first-child {
-            font-weight: bold;
-            color: #ffaa55;
-            font-size: 0.95rem;
-        }
-        
-        .ads-container {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .ad-fixed {
-            background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
-            border: 1px solid #ff8c42;
-            border-radius: 1rem;
-            transition: all 0.3s ease;
-            width: 220px;
-        }
-        
-        .ad-fixed:hover {
-            transform: translateY(-4px);
-            border-color: #ffaa55;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-        
-        .ad-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-            padding: 1rem;
-        }
-        
-        .ad-content {
-            text-align: center;
-        }
-        
-        .ad-text h4 {
-            color: #ff8c42;
-            margin-bottom: 0.3rem;
-            font-size: 1rem;
-        }
-        
-        .ad-text p {
-            color: #aaa;
-            font-size: 0.7rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .ad-button {
-            display: inline-block;
-            background: #ff8c42;
-            color: white;
-            padding: 0.2rem 0.7rem;
-            border-radius: 2rem;
-            font-size: 0.65rem;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        
-        .ad-link:hover .ad-button {
-            background: #ffaa55;
-        }
-        
-        @media (max-width: 700px) {
-            .ad-fixed {
-                width: 100%;
-                max-width: 280px;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="bingo-container">
@@ -147,38 +54,6 @@
         <div class="stats">
             <h3>Бинго линии</h3>
             <div class="bingo-lines" id="bingoLines"></div>
-        </div>
-    </div>
-
-    <!-- Реклама внизу -->
-    <div class="bottom-ads">
-        <div class="ads-header">
-            <p>Сайт работает при помощи этих людей</p>
-            <p>подписывайтесь на них</p>
-        </div>
-        <div class="ads-container">
-            <div class="ad-fixed">
-                <a href="https://www.twitch.tv/vladen69" target="_blank" class="ad-link">
-                    <div class="ad-content">
-                        <div class="ad-text">
-                            <h4>VLADEN69</h4>
-                            <p>Twitch стримы</p>
-                            <span class="ad-button">Смотреть →</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="ad-fixed">
-                <a href="https://www.youtube.com/@v14d3n" target="_blank" class="ad-link">
-                    <div class="ad-content">
-                        <div class="ad-text">
-                            <h4>V14D3N</h4>
-                            <p>YouTube канал</p>
-                            <span class="ad-button">Смотреть →</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
         </div>
     </div>
 
