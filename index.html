@@ -90,38 +90,6 @@
         </main>
     </div>
 
-    <!-- Реклама внизу -->
-    <div class="bottom-ads">
-        <div class="ads-header">
-            <p>Сайт работает при помощи этих людей</p>
-            <p>подписывайтесь на них</p>
-        </div>
-        <div class="ads-container">
-            <div class="ad-fixed">
-                <a href="https://www.twitch.tv/vladen69" target="_blank" class="ad-link">
-                    <div class="ad-content">
-                        <div class="ad-text">
-                            <h4>VLADEN69</h4>
-                            <p>Twitch стримы</p>
-                            <span class="ad-button">Смотреть →</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="ad-fixed">
-                <a href="https://www.youtube.com/@v14d3n" target="_blank" class="ad-link">
-                    <div class="ad-content">
-                        <div class="ad-text">
-                            <h4>V14D3N</h4>
-                            <p>YouTube канал</p>
-                            <span class="ad-button">Смотреть →</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </div>
-
     <style>
         .main-layout {
             max-width: 1200px;
@@ -147,102 +115,9 @@
             transform: translateY(-2px);
         }
         
-        /* Реклама внизу */
-        .bottom-ads {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 2rem 2rem 2rem;
-            border-top: 1px solid #f0e0c0;
-            margin-top: 1rem;
-        }
-        
-        .ads-header {
-            text-align: center;
-            margin-bottom: 1rem;
-            padding: 0.5rem;
-        }
-        
-        .ads-header p {
-            color: #d98c2b;
-            font-size: 0.9rem;
-            margin: 0;
-        }
-        
-        .ads-header p:first-child {
-            font-weight: bold;
-            color: #b56a1a;
-            font-size: 0.95rem;
-        }
-        
-        .ads-container {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .ad-fixed {
-            background: linear-gradient(135deg, #fff5e6, #fff9ef);
-            border: 1px solid #f0e0c0;
-            border-radius: 1rem;
-            transition: all 0.3s ease;
-            width: 240px;
-        }
-        
-        .ad-fixed:hover {
-            transform: translateY(-4px);
-            border-color: #d98c2b;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        
-        .ad-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-            padding: 1rem;
-        }
-        
-        .ad-content {
-            text-align: center;
-        }
-        
-        .ad-text h4 {
-            color: #d98c2b;
-            margin-bottom: 0.3rem;
-            font-size: 1rem;
-        }
-        
-        .ad-text p {
-            color: #666;
-            font-size: 0.7rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .ad-button {
-            display: inline-block;
-            background: #d98c2b;
-            color: white;
-            padding: 0.2rem 0.7rem;
-            border-radius: 2rem;
-            font-size: 0.65rem;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        
-        .ad-link:hover .ad-button {
-            background: #b56a1a;
-        }
-        
         @media (max-width: 700px) {
             .main-layout {
                 padding: 1rem;
-            }
-            .bottom-ads {
-                padding: 1rem;
-            }
-            .ad-fixed {
-                width: 100%;
-                max-width: 280px;
             }
         }
     </style>
