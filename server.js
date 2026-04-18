@@ -42,12 +42,31 @@ const server = http.createServer((req, res) => {
     });
 });
 
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ 
+    server,
+    // Эти опции критичны для Render.com
+    perMessageDeflate: false,
+    clientTracking: true,
+    handleProtocols: (protocols) => {
+        // Принимаем любой протокол, который предлагает браузер
+        return protocols[0] || 'ws';
+    }
+});
 
 const rooms = new Map();
 
 wss.on('connection', (ws) => {
     console.log('WebSocket соединение установлено');
+    // Пинг-понг каждые 20 секунд
+const pingInterval = setInterval(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+        ws.ping();
+    }
+}, 20000);
+
+ws.on('pong', () => {
+    // Соединение живо
+});
     let currentRoom = null;
     let currentPlayerId = null;
 
