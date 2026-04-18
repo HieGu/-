@@ -43,14 +43,25 @@ const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
 
 // Состояние игры
 let currentBoard = [];
-let currentPlayers = [];
-let currentPlayerId = null;
-let currentRoomId = null;
-let ws = null;
-let roomCodeHidden = false;
+let completedCells = [];
 
-// DOM элементы
-let currentBoardData = [];
+// Загрузка сохраненного состояния
+function loadSavedState() {
+    const savedBoard = localStorage.getItem('ror2_bingo_board');
+    const savedProgress = localStorage.getItem('ror2_bingo_progress');
+    
+    if (savedBoard) {
+        currentBoard = JSON.parse(savedBoard);
+    } else {
+        generateRandomBoard();
+    }
+    
+    if (savedProgress) {
+        completedCells = JSON.parse(savedProgress);
+    } else {
+        completedCells = new Array(TOTAL_CELLS).fill(false);
+    }
+}
 
 // Генерация случайного поля без повторений
 function generateRandomBoard() {
@@ -65,17 +76,21 @@ function generateRandomBoard() {
         currentBoard.push("Дополнительное испытание");
     }
     
-    return currentBoard;
+    saveBoard();
 }
 
-// Получить клетки игрока
-function getPlayerCompletedCells(playerId) {
-    const player = currentPlayers.find(p => p.id === playerId);
-    return player ? player.completedCells : new Array(TOTAL_CELLS).fill(false);
+// Сохранение поля
+function saveBoard() {
+    localStorage.setItem('ror2_bingo_board', JSON.stringify(currentBoard));
 }
 
-// Проверка бинго линий для конкретного игрока
-function checkBingoLinesForPlayer(completedCells) {
+// Сохранение прогресса
+function saveProgress() {
+    localStorage.setItem('ror2_bingo_progress', JSON.stringify(completedCells));
+}
+
+// Проверка бинго линий
+function checkBingoLines() {
     const lines = [];
     
     for (let row = 0; row < GRID_SIZE; row++) {
@@ -121,13 +136,13 @@ function checkBingoLinesForPlayer(completedCells) {
     return lines;
 }
 
-function getCompletedLinesCountForPlayer(completedCells) {
-    const lines = checkBingoLinesForPlayer(completedCells);
+function getCompletedLinesCount() {
+    const lines = checkBingoLines();
     return lines.filter(line => line.completed).length;
 }
 
-function renderBingoLinesForPlayer(completedCells) {
-    const lines = checkBingoLinesForPlayer(completedCells);
+function renderBingoLines() {
+    const lines = checkBingoLines();
     const container = document.getElementById('bingoLines');
     
     const lineNames = {
@@ -150,237 +165,65 @@ function renderGrid() {
     const grid = document.getElementById('bingoGrid');
     grid.innerHTML = '';
     
-    const myCompletedCells = getPlayerCompletedCells(currentPlayerId);
-    
     for (let i = 0; i < TOTAL_CELLS; i++) {
         const cell = document.createElement('div');
-        const isCompleted = myCompletedCells[i];
-        cell.className = `bingo-cell ${isCompleted ? 'completed' : ''}`;
+        cell.className = `bingo-cell ${completedCells[i] ? 'completed' : ''}`;
         cell.innerHTML = `
             <div class="cell-number">${i + 1}</div>
             <div class="cell-text">${currentBoard[i] || 'Загрузка...'}</div>
         `;
-        
-        // Показываем кто отметил клетку
-        const markedBy = [];
-        for (const player of currentPlayers) {
-            if (player.completedCells[i]) {
-                markedBy.push(player.name);
-            }
-        }
-        if (markedBy.length > 0) {
-            const markerDiv = document.createElement('div');
-            markerDiv.style.cssText = 'font-size: 0.6rem; color: #ff8c42; margin-top: 0.3rem;';
-            markerDiv.textContent = `✓ ${markedBy.join(', ')}`;
-            cell.appendChild(markerDiv);
-        }
-        
         cell.addEventListener('click', () => toggleCell(i));
         grid.appendChild(cell);
     }
     
-    renderBingoLinesForPlayer(myCompletedCells);
-    
-    // Обновляем список игроков
-    updatePlayersDisplay();
+    renderBingoLines();
 }
 
 function toggleCell(index) {
-    if (ws && currentRoomId) {
-        const currentCompleted = getPlayerCompletedCells(currentPlayerId)[index];
-        ws.send(JSON.stringify({
-            type: 'toggle_cell',
-            cellIndex: index,
-            completed: !currentCompleted
-        }));
-    }
-}
-
-function updatePlayersDisplay() {
-    const container = document.getElementById('playersList');
-    if (!container) return;
-    
-    container.innerHTML = `<strong>Игроки (${currentPlayers.length}/2):</strong><br>`;
-    for (const player of currentPlayers) {
-        const completedCount = player.completedCells.filter(c => c === true).length;
-        const linesCount = getCompletedLinesCountForPlayer(player.completedCells);
-        container.innerHTML += `<div class="player-tag ${player.id === currentPlayerId ? 'you' : ''}">
-            ${player.name} ${player.id === currentPlayerId ? '(вы)' : ''}
-            <span class="player-progress">(${completedCount}/25 клеток, ${linesCount} линий)</span>
-        </div>`;
-    }
-}
-
-function showMessage(text, isError = false) {
-    const message = document.createElement('div');
-    message.className = 'message';
-    message.textContent = text;
-    message.style.background = isError ? '#ff4444' : '#ff8c42';
-    document.body.appendChild(message);
-    setTimeout(() => message.remove(), 3000);
-}
-
-// WebSocket функции
-function connectWebSocket() {
-    // Определяем адрес WebSocket в зависимости от окружения
-    let wsUrl;
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        // Локальная разработка
-        wsUrl = `ws://${window.location.host}`;
-    } else {
-        // Продакшн на Render.com — используем wss и тот же хост
-        wsUrl = `wss://${window.location.host}`;
-    }
-    
-    console.log('Подключение к WebSocket по адресу:', wsUrl);
-    ws = new WebSocket(wsUrl);
-    
-    ws.onopen = () => {
-        console.log('WebSocket соединение установлено');
-        showMessage('Соединение с сервером установлено!');
-    };
-    
-    ws.onerror = (error) => {
-        console.error('WebSocket ошибка:', error);
-        showMessage('Ошибка соединения. Возможно, сервер перезагружается. Попробуйте обновить страницу.', true);
-    };
-    
-    ws.onclose = () => {
-        console.log('WebSocket соединение закрыто');
-        if (currentRoomId) {
-            showMessage('Соединение с сервером потеряно. Перезагрузите страницу.', true);
-        }
-    };
-    
-    // ... остальная часть функции (ws.onmessage и т.д.) остаётся без изменений
-}
-
-function createRoom() {
-    const playerName = prompt('Введите ваше имя:', 'Игрок');
-    if (!playerName) return;
-    
-    const newBoard = generateRandomBoard();
-    connectWebSocket();
-    
-    ws.onopen = () => {
-        ws.send(JSON.stringify({
-            type: 'create_room',
-            playerName: playerName,
-            board: newBoard
-        }));
-    };
-}
-
-function joinRoom() {
-    const roomId = document.getElementById('roomIdInput').value.toUpperCase();
-    if (!roomId) {
-        showMessage('Введите код комнаты', true);
-        return;
-    }
-    
-    const playerName = prompt('Введите ваше имя:', 'Игрок');
-    if (!playerName) return;
-    
-    connectWebSocket();
-    
-    ws.onopen = () => {
-        ws.send(JSON.stringify({
-            type: 'join_room',
-            roomId: roomId,
-            playerName: playerName
-        }));
-    };
-}
-
-function leaveRoom() {
-    if (ws) {
-        ws.send(JSON.stringify({ type: 'leave_room' }));
-        ws.close();
-    }
-    currentRoomId = null;
-    currentPlayerId = null;
-    currentPlayers = [];
-    document.getElementById('roomPanel').classList.add('hidden');
-    document.getElementById('mainMenu').classList.remove('hidden');
-    currentBoard = generateRandomBoard();
+    completedCells[index] = !completedCells[index];
+    saveProgress();
     renderGrid();
-}
-
-function copyRoomCode() {
-    const code = document.getElementById('roomCode').textContent;
-    navigator.clipboard.writeText(code);
-    showMessage('Код скопирован в буфер обмена!');
-}
-
-function hideCode() {
-    const codeElement = document.getElementById('roomCode');
-    if (roomCodeHidden) {
-        codeElement.textContent = currentRoomId;
-        roomCodeHidden = false;
-    } else {
-        codeElement.textContent = '••••••';
-        roomCodeHidden = true;
+    
+    const completedLines = getCompletedLinesCount();
+    if (completedLines > 0 && completedCells.some(cell => cell === true)) {
+        showMessage(`🎉 Бинго! Вы собрали ${completedLines} линий! 🎉`);
     }
 }
 
 function newGame() {
-    if (currentRoomId && ws) {
-        if (confirm('Создать новое поле? Весь текущий прогресс будет потерян.')) {
-            const newBoard = generateRandomBoard();
-            ws.send(JSON.stringify({
-                type: 'new_board',
-                board: newBoard
-            }));
-        }
-    } else {
-        if (confirm('Создать новое поле? Весь текущий прогресс будет потерян.')) {
-            currentBoard = generateRandomBoard();
-            renderGrid();
-            showMessage('🔄 Создано новое поле бинго!');
-        }
+    if (confirm('Создать новое поле? Весь текущий прогресс будет потерян.')) {
+        generateRandomBoard();
+        completedCells = new Array(TOTAL_CELLS).fill(false);
+        saveProgress();
+        renderGrid();
+        showMessage('🔄 Создано новое поле бинго!');
     }
 }
 
 function resetProgress() {
-    if (currentRoomId && ws) {
-        if (confirm('Сбросить все зачеркивания?')) {
-            ws.send(JSON.stringify({ type: 'reset_game' }));
-        }
-    } else {
-        if (confirm('Сбросить все зачеркивания?')) {
-            // В оффлайн режиме просто сбрасываем локальный прогресс
-            showMessage('В одиночном режиме используйте "Новая игра" для создания нового поля');
-        }
+    if (confirm('Сбросить все зачеркивания? Испытания на поле останутся те же.')) {
+        completedCells = new Array(TOTAL_CELLS).fill(false);
+        saveProgress();
+        renderGrid();
+        showMessage('🗑️ Прогресс сброшен!');
     }
 }
 
-// Инициализация оффлайн режима
-function initOffline() {
-    const savedBoard = localStorage.getItem('ror2_bingo_board');
-    if (savedBoard) {
-        currentBoard = JSON.parse(savedBoard);
-    } else {
-        currentBoard = generateRandomBoard();
-    }
-    renderGrid();
+function showMessage(text) {
+    const message = document.createElement('div');
+    message.className = 'message';
+    message.textContent = text;
+    document.body.appendChild(message);
+    setTimeout(() => message.remove(), 3000);
 }
 
 // Инициализация
 function init() {
-    // Скрываем панель комнаты по умолчанию
-    document.getElementById('roomPanel').classList.add('hidden');
-    document.getElementById('mainMenu').classList.remove('hidden');
-    
-    // Загружаем оффлайн режим
-    initOffline();
+    loadSavedState();
+    renderGrid();
     
     document.getElementById('newGameBtn').addEventListener('click', newGame);
     document.getElementById('resetProgressBtn').addEventListener('click', resetProgress);
-    document.getElementById('createRoomBtn').addEventListener('click', createRoom);
-    document.getElementById('joinRoomBtn').addEventListener('click', joinRoom);
-    document.getElementById('leaveRoomBtn').addEventListener('click', leaveRoom);
-    document.getElementById('copyCodeBtn').addEventListener('click', copyRoomCode);
-    document.getElementById('hideCodeBtn').addEventListener('click', hideCode);
 }
 
 init();
