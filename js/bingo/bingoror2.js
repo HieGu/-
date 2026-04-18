@@ -1,4 +1,3 @@
-// Список испытаний
 const challenges = [
     "Три раза подряд потерпите неудачу в Святилище Удачи",
     "Иметь при себе три разных активки", "Найти Аспект", "Выбить предмет с босса",
@@ -29,7 +28,6 @@ let currentPlayerId = null;
 let currentRoomId = null;
 let ws = null;
 
-// Генерация случайного поля
 function generateRandomBoard() {
     const shuffled = [...challenges];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -41,7 +39,6 @@ function generateRandomBoard() {
     return currentBoard;
 }
 
-// Подсчет линий для игрока
 function countLines(completedCells) {
     let lines = 0;
     for (let i = 0; i < 5; i++) {
@@ -278,18 +275,34 @@ function showMessage(text, isError = false) {
     setTimeout(() => msg.remove(), 3000);
 }
 
-// Инициализация
 function init() {
-    document.getElementById('roomPanel').classList.add('hidden');
-    document.getElementById('mainMenu').classList.remove('hidden');
+    const roomPanel = document.getElementById('roomPanel');
+    const mainMenu = document.getElementById('mainMenu');
+    
+    if (roomPanel && mainMenu) {
+        roomPanel.classList.add('hidden');
+        mainMenu.classList.remove('hidden');
+    }
+    
     initOffline();
     
-    document.getElementById('createRoomBtn').onclick = createRoom;
-    document.getElementById('joinRoomBtn').onclick = joinRoom;
-    document.getElementById('leaveRoomBtn').onclick = leaveRoom;
-    document.getElementById('copyCodeBtn').onclick = copyRoomCode;
-    document.getElementById('newGameBtn').onclick = newGame;
-    document.getElementById('resetProgressBtn').onclick = resetProgress;
+    const createBtn = document.getElementById('createRoomBtn');
+    const joinBtn = document.getElementById('joinRoomBtn');
+    const leaveBtn = document.getElementById('leaveRoomBtn');
+    const copyBtn = document.getElementById('copyCodeBtn');
+    const newGameBtn = document.getElementById('newGameBtn');
+    const resetBtn = document.getElementById('resetProgressBtn');
+    
+    if (createBtn) createBtn.onclick = createRoom;
+    if (joinBtn) joinBtn.onclick = joinRoom;
+    if (leaveBtn) leaveBtn.onclick = leaveRoom;
+    if (copyBtn) copyBtn.onclick = copyRoomCode;
+    if (newGameBtn) newGameBtn.onclick = newGame;
+    if (resetBtn) resetBtn.onclick = resetProgress;
 }
 
-init();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
