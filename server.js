@@ -45,5 +45,8 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
     console.log(`✅ Сервер запущен на http://localhost:${PORT}`);
     console.log(`🎡 Открой в браузере: http://localhost:${PORT}`);
-    console.log(`📁 Иконки находятся в папке /icon/`);
+    console.log(`📁 Структура:`);
+    console.log(`   - Главная страница: http://localhost:${PORT}/`);
+    console.log(`   - Игры с колесами в папке /game/wheel/`);
+    console.log(`   - Игры бинго в папке /game/bingo/`);
 });

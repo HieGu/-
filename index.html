@@ -29,15 +29,6 @@
             <button class="game-btn">Вращать колесо →</button>
         </div>
 
-        <div class="bento-item game-card" data-game="pubg">
-            <div class="game-icon">
-                <img src="img/pubg-logo.png" alt="PUBG" class="game-logo">
-            </div>
-            <h2>PUBG</h2>
-            <p>Все локации из Мирамара, Эрангеля, Санока, Викенди, Рондо и Таего</p>
-            <button class="game-btn">Вращать колесо →</button>
-        </div>
-
         <div class="bento-item game-card" data-game="apex">
             <div class="game-icon">
                 <img src="img/apex-logo.png" alt="Apex Legends" class="game-logo">
@@ -56,31 +47,25 @@
             <button class="game-btn">Вращать колесо →</button>
         </div>
 
-        <div class="bento-item game-card" data-game="ror2">
+        <div class="bento-item game-card" id="ror2-card">
             <div class="game-icon">
                 <img src="img/ror2-logo.png" alt="Risk of Rain 2" class="game-logo">
             </div>
             <h2>RISK OF RAIN 2</h2>
-            <p>Все персонажи из ROR2</p>
-            <button class="game-btn">Вращать колесо →</button>
+            <p>Выбери режим игры</p>
+            <div class="game-mode-buttons">
+                <button class="game-btn mode-btn" data-game="ror2">Колесо</button>
+                <button class="game-btn mode-btn" data-game="ror2-bingo">Бинго</button>
+            </div>
         </div>
 
-        <div class="bento-item game-card" data-game="sts2">
+        <div class="bento-item game-card" data-game="sts2" id="sts2-card">
             <div class="game-icon">
                 <img src="img/sts2-logo.png" alt="Slay The Spire 2" class="game-logo">
             </div>
             <h2>SLAY THE SPIRE 2</h2>
             <p>Персонажи и способности из STS2</p>
-            <button class="game-btn">Вращать колесо →</button>
-        </div>
-
-        <div class="bento-item game-card" data-game="terraria">
-            <div class="game-icon">
-                <img src="img/terraria-logo.png" alt="Terraria" class="game-logo">
-            </div>
-            <h2>TERRARIA</h2>
-            <p>Классы из Terraria, Calamity и Thorium</p>
-            <button class="game-btn">Вращать колесо →</button>
+            <button class="game-btn disabled-btn">Временно в разработке</button>
         </div>
 
         <div class="bento-item game-card" data-game="dota2">
@@ -88,16 +73,7 @@
                 <img src="img/dota2-logo.png" alt="Dota 2" class="game-logo">
             </div>
             <h2>DOTA 2</h2>
-            <p>Персонажи, позиции и атрибуты героев</p>
-            <button class="game-btn">Вращать колесо →</button>
-        </div>
-
-        <div class="bento-item game-card" data-game="7dtd">
-            <div class="game-icon">
-                <img src="img/7dtd-logo.png" alt="7 Days to Die" class="game-logo">
-            </div>
-            <h2>7 DAYS TO DIE</h2>
-            <p>Навыки и сложность выживания</p>
+            <p>Персонажи, позиции, предметы и режимы</p>
             <button class="game-btn">Вращать колесо →</button>
         </div>
 
@@ -106,17 +82,63 @@
                 <img src="img/game-logo.png" alt="Game Collection" class="game-logo">
             </div>
             <h2>GAME</h2>
-            <p>Коллекция roguelike игр</p>
+            <p>Коллекция игр</p>
             <button class="game-btn">Вращать колесо →</button>
         </div>
     </div>
 
+    <style>
+        .game-mode-buttons {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+            margin-top: 1.2rem;
+            flex-wrap: wrap;
+        }
+        
+        .mode-btn {
+            margin-top: 0 !important;
+            padding: 0.6rem 1.2rem !important;
+            font-size: 0.9rem !important;
+        }
+        
+        .mode-btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+
     <script>
         document.querySelectorAll('.game-btn').forEach(btn => {
+            // Пропускаем кнопки режимов для ROR2, у них отдельная обработка
+            if (btn.classList.contains('mode-btn')) return;
+            
             btn.addEventListener('click', (e) => {
                 const card = e.target.closest('.game-card');
                 const game = card.dataset.game;
-                window.location.href = `game/${game}.html`;
+                
+                // Блокируем переход для Slay The Spire 2
+                if (game === 'sts2') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    alert('Slay The Spire 2 временно в разработке! Скоро появится.');
+                    return;
+                }
+                
+                window.location.href = `game/wheel/${game}.html`;
+            });
+        });
+        
+        // Обработка кнопок режимов для Risk of Rain 2
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const game = btn.dataset.game;
+                
+                if (game === 'ror2') {
+                    window.location.href = 'game/wheel/ror2.html';
+                } else if (game === 'ror2-bingo') {
+                    window.location.href = 'game/bingo/ror2.html';
+                }
             });
         });
     </script>
