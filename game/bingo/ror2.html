@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Risk of Rain 2 - Bingo</title>
     
-    <!-- Иконки -->
     <link rel="apple-touch-icon" sizes="180x180" href="../../icon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="../../icon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../../icon/favicon-16x16.png">
@@ -40,23 +39,18 @@
             background: rgba(0, 0, 0, 0.3);
             border-radius: 1rem;
             border: 1px solid #ff8c42;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .ads-header p {
             color: #ff8c42;
             font-size: 0.95rem;
             margin: 0;
-            line-height: 1.4;
-            letter-spacing: 0.5px;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         .ads-header p:first-child {
             font-weight: bold;
             color: #ffaa55;
             font-size: 1rem;
-            margin-bottom: 0.2rem;
         }
 
         .ads-container {
@@ -71,14 +65,12 @@
             background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
             border: 1px solid #ff8c42;
             border-radius: 1rem;
-            overflow: hidden;
             transition: all 0.3s ease;
         }
 
         .ad-fixed:hover {
             transform: translateY(-4px);
             border-color: #ffaa55;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
         .ad-link {
@@ -112,11 +104,110 @@
             border-radius: 2rem;
             font-size: 0.7rem;
             font-weight: bold;
-            transition: background 0.2s;
         }
 
-        .ad-link:hover .ad-button {
-            background: #ffaa55;
+        .lobby-container {
+            background: #2a2a4a;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .room-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .room-input {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .room-input input {
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            border: none;
+            background: #3a3a5a;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            width: 120px;
+            text-transform: uppercase;
+        }
+
+        .room-code {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff8c42;
+            background: #1a1a2e;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            display: inline-block;
+            margin: 0.5rem 0;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .small-btn {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+            background: #4a4a6a;
+        }
+
+        .players-list {
+            background: #1a1a2e;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .player-tag {
+            display: inline-block;
+            padding: 0.3rem 0.7rem;
+            border-radius: 1rem;
+            margin: 0.2rem;
+            font-size: 0.8rem;
+        }
+
+        .player-tag.you {
+            border: 2px solid white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .bingo-cell {
+            position: relative;
+        }
+
+        .player-markers {
+            display: flex;
+            gap: 0.2rem;
+            margin-top: 0.3rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .marker {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            font-size: 10px;
+            text-align: center;
+            line-height: 20px;
+            color: white;
         }
 
         @media (max-width: 1000px) {
@@ -124,17 +215,14 @@
                 flex-direction: column;
                 align-items: center;
             }
-            
             .right-sidebar {
                 width: 100%;
                 max-width: 500px;
             }
-            
             .ads-container {
                 position: static;
                 flex-direction: row;
             }
-            
             .ad-fixed {
                 flex: 1;
             }
@@ -144,7 +232,6 @@
             .main-layout {
                 padding: 1rem;
             }
-            
             .ads-container {
                 flex-direction: column;
             }
@@ -157,9 +244,33 @@
             <div class="bingo-container">
                 <a href="../../index.html" class="back-btn">← Назад к играм</a>
                 
+                <div class="lobby-container">
+                    <div id="mainMenu">
+                        <div class="room-controls">
+                            <button class="btn" id="createRoomBtn">Создать комнату</button>
+                            <div class="room-input">
+                                <input type="text" id="roomIdInput" placeholder="Код комнаты" maxlength="6">
+                                <button class="btn btn-secondary" id="joinRoomBtn">Присоединиться</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="roomPanel" class="hidden">
+                        <div style="text-align: center;">
+                            <div class="room-code" id="roomCode"></div>
+                            <div class="button-group">
+                                <button class="btn small-btn" id="copyCodeBtn">Копировать код</button>
+                                <button class="btn small-btn btn-secondary" id="hideCodeBtn">Скрыть код</button>
+                                <button class="btn small-btn btn-secondary" id="leaveRoomBtn">Покинуть комнату</button>
+                            </div>
+                        </div>
+                        <div class="players-list" id="playersList"></div>
+                    </div>
+                </div>
+                
                 <div class="header">
                     <h1>RISK OF RAIN 2 BINGO</h1>
-                    <p>Зачеркивай испытания по мере выполнения! Собери 5 в ряд, столбец или диагональ.</p>
+                    <p>Зачеркивай испытания - у каждого игрока свой цвет!</p>
                 </div>
 
                 <div class="controls">
