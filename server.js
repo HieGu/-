@@ -1,7 +1,6 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const WebSocket = require('ws');
 
 const PORT = process.env.PORT || 3000;
 
@@ -17,9 +16,28 @@ const mimeTypes = {
     '.webmanifest': 'application/manifest+json'
 };
 
+// Хранилище комнат в памяти сервера
+const rooms = new Map();
+
 const server = http.createServer((req, res) => {
-    console.log(`Запрос: ${req.method} ${req.url}`);
+    // Добавляем CORS заголовки
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     
+    if (req.method === 'OPTIONS') {
+        res.writeHead(200);
+        res.end();
+        return;
+    }
+    
+    // API для комнат
+    if (req.url.startsWith('/api/')) {
+        handleApiRequest(req, res);
+        return;
+    }
+    
+    // Отдача статических файлов
     let filePath = '.' + req.url;
     if (filePath === './') filePath = './index.html';
     
@@ -42,206 +60,167 @@ const server = http.createServer((req, res) => {
     });
 });
 
-const wss = new WebSocket.Server({ 
-    server,
-    // Эти опции критичны для Render.com
-    perMessageDeflate: false,
-    clientTracking: true,
-    handleProtocols: (protocols) => {
-        // Принимаем любой протокол, который предлагает браузер
-        return protocols[0] || 'ws';
-    }
-});
-
-const rooms = new Map();
-
-wss.on('connection', (ws) => {
-    console.log('WebSocket соединение установлено');
-    // Пинг-понг каждые 20 секунд
-const pingInterval = setInterval(() => {
-    if (ws.readyState === WebSocket.OPEN) {
-        ws.ping();
-    }
-}, 20000);
-
-ws.on('pong', () => {
-    // Соединение живо
-});
-    let currentRoom = null;
-    let currentPlayerId = null;
-
-    ws.on('message', (message) => {
-        try {
-            const data = JSON.parse(message);
-            console.log('Получено:', data.type);
-            
-            switch (data.type) {
-                case 'create_room':
-                    const roomId = Math.floor(1000 + Math.random() * 9000).toString();
-                    const playerId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
-                    
-                    rooms.set(roomId, {
-                        players: [{ id: playerId, ws: ws, name: data.playerName, completedCells: new Array(25).fill(false) }],
-                        board: data.board,
-                        maxPlayers: 2
-                    });
-                    
-                    currentRoom = roomId;
-                    currentPlayerId = playerId;
-                    
-                    ws.send(JSON.stringify({
-                        type: 'room_created',
-                        roomId: roomId,
-                        playerId: playerId,
-                        board: data.board,
-                        players: [{ id: playerId, name: data.playerName, completedCells: new Array(25).fill(false) }]
-                    }));
-                    console.log(`Комната создана: ${roomId}`);
-                    break;
-                    
-                case 'join_room':
-                    const room = rooms.get(data.roomId);
-                    if (room && room.players.length < 2) {
-                        const playerId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
-                        room.players.push({ id: playerId, ws: ws, name: data.playerName, completedCells: new Array(25).fill(false) });
-                        currentRoom = data.roomId;
-                        currentPlayerId = playerId;
-                        
-                        ws.send(JSON.stringify({
-                            type: 'room_joined',
-                            playerId: playerId,
-                            board: room.board,
-                            players: room.players.map(p => ({ id: p.id, name: p.name, completedCells: p.completedCells }))
-                        }));
-                        
-                        const firstPlayer = room.players.find(p => p.id !== playerId);
-                        if (firstPlayer && firstPlayer.ws.readyState === WebSocket.OPEN) {
-                            firstPlayer.ws.send(JSON.stringify({
-                                type: 'player_joined',
-                                players: room.players.map(p => ({ id: p.id, name: p.name, completedCells: p.completedCells }))
-                            }));
-                        }
-                        console.log(`Игрок ${data.playerName} присоединился к ${data.roomId}`);
-                    } else {
-                        ws.send(JSON.stringify({
-                            type: 'error',
-                            message: room ? 'Комната заполнена' : 'Комната не найдена'
-                        }));
-                    }
-                    break;
-                    
-                case 'toggle_cell':
-                    const roomData = rooms.get(currentRoom);
-                    if (roomData) {
-                        const player = roomData.players.find(p => p.id === currentPlayerId);
-                        if (player) {
-                            player.completedCells[data.cellIndex] = data.completed;
-                            
-                            roomData.players.forEach(p => {
-                                if (p.ws.readyState === WebSocket.OPEN) {
-                                    p.ws.send(JSON.stringify({
-                                        type: 'cell_updated',
-                                        cellIndex: data.cellIndex,
-                                        completed: data.completed,
-                                        playerId: currentPlayerId,
-                                        playerName: player.name,
-                                        players: roomData.players.map(pl => ({ id: pl.id, name: pl.name, completedCells: pl.completedCells }))
-                                    }));
-                                }
-                            });
-                        }
-                    }
-                    break;
-                    
-                case 'new_board':
-                    const boardRoom = rooms.get(currentRoom);
-                    if (boardRoom) {
-                        boardRoom.board = data.board;
-                        boardRoom.players.forEach(p => {
-                            p.completedCells = new Array(25).fill(false);
-                        });
-                        
-                        boardRoom.players.forEach(p => {
-                            if (p.ws.readyState === WebSocket.OPEN) {
-                                p.ws.send(JSON.stringify({
-                                    type: 'board_updated',
-                                    board: data.board,
-                                    players: boardRoom.players.map(pl => ({ id: pl.id, name: pl.name, completedCells: pl.completedCells }))
-                                }));
-                            }
-                        });
-                    }
-                    break;
-                    
-                case 'reset_game':
-                    const resetRoom = rooms.get(currentRoom);
-                    if (resetRoom) {
-                        resetRoom.players.forEach(p => {
-                            p.completedCells = new Array(25).fill(false);
-                        });
-                        
-                        resetRoom.players.forEach(p => {
-                            if (p.ws.readyState === WebSocket.OPEN) {
-                                p.ws.send(JSON.stringify({
-                                    type: 'game_reset',
-                                    players: resetRoom.players.map(pl => ({ id: pl.id, name: pl.name, completedCells: pl.completedCells }))
-                                }));
-                            }
-                        });
-                    }
-                    break;
-                    
-                case 'leave_room':
-                    const leaveRoom = rooms.get(currentRoom);
-                    if (leaveRoom) {
-                        const index = leaveRoom.players.findIndex(p => p.id === currentPlayerId);
-                        if (index !== -1) leaveRoom.players.splice(index, 1);
-                        
-                        if (leaveRoom.players.length === 0) {
-                            rooms.delete(currentRoom);
-                        } else {
-                            leaveRoom.players.forEach(p => {
-                                if (p.ws.readyState === WebSocket.OPEN) {
-                                    p.ws.send(JSON.stringify({
-                                        type: 'player_left',
-                                        players: leaveRoom.players.map(pl => ({ id: pl.id, name: pl.name, completedCells: pl.completedCells }))
-                                    }));
-                                }
-                            });
-                        }
-                    }
-                    break;
-            }
-        } catch (err) {
-            console.error('Ошибка:', err);
-        }
-    });
+function handleApiRequest(req, res) {
+    const urlParts = req.url.split('/');
+    const action = urlParts[2];
     
-    ws.on('close', () => {
-        if (currentRoom) {
-            const room = rooms.get(currentRoom);
-            if (room) {
-                const index = room.players.findIndex(p => p.id === currentPlayerId);
-                if (index !== -1) room.players.splice(index, 1);
+    // Создание комнаты
+    if (req.method === 'POST' && action === 'create') {
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+            try {
+                const data = JSON.parse(body);
+                const roomId = Math.floor(1000 + Math.random() * 9000).toString();
+                const playerId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
                 
-                if (room.players.length === 0) {
-                    rooms.delete(currentRoom);
-                } else {
-                    room.players.forEach(p => {
-                        if (p.ws.readyState === WebSocket.OPEN) {
-                            p.ws.send(JSON.stringify({
-                                type: 'player_left',
-                                players: room.players.map(pl => ({ id: pl.id, name: pl.name, completedCells: pl.completedCells }))
-                            }));
-                        }
-                    });
-                }
+                rooms.set(roomId, {
+                    players: [{ id: playerId, name: data.playerName, completedCells: new Array(25).fill(false) }],
+                    board: data.board,
+                    maxPlayers: 2,
+                    createdAt: Date.now()
+                });
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ 
+                    success: true, 
+                    roomId: roomId, 
+                    playerId: playerId,
+                    board: data.board,
+                    players: [{ id: playerId, name: data.playerName, completedCells: new Array(25).fill(false) }]
+                }));
+            } catch (err) {
+                res.writeHead(400);
+                res.end(JSON.stringify({ success: false, error: err.message }));
             }
+        });
+    }
+    
+    // Присоединение к комнате
+    else if (req.method === 'POST' && action === 'join') {
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+            try {
+                const data = JSON.parse(body);
+                const room = rooms.get(data.roomId);
+                
+                if (room && room.players.length < room.maxPlayers) {
+                    const playerId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
+                    room.players.push({ id: playerId, name: data.playerName, completedCells: new Array(25).fill(false) });
+                    
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ 
+                        success: true, 
+                        playerId: playerId,
+                        board: room.board,
+                        players: room.players.map(p => ({ id: p.id, name: p.name, completedCells: p.completedCells }))
+                    }));
+                } else {
+                    res.writeHead(400);
+                    res.end(JSON.stringify({ success: false, error: room ? 'Комната заполнена' : 'Комната не найдена' }));
+                }
+            } catch (err) {
+                res.writeHead(400);
+                res.end(JSON.stringify({ success: false, error: err.message }));
+            }
+        });
+    }
+    
+    // Получение состояния комнаты (для синхронизации)
+    else if (req.method === 'GET' && action === 'sync') {
+        const roomId = urlParts[3];
+        const room = rooms.get(roomId);
+        
+        if (room) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                players: room.players.map(p => ({ id: p.id, name: p.name, completedCells: p.completedCells })),
+                board: room.board
+            }));
+        } else {
+            res.writeHead(404);
+            res.end(JSON.stringify({ success: false, error: 'Комната не найдена' }));
         }
-    });
-});
+    }
+    
+    // Обновление состояния игрока
+    else if (req.method === 'POST' && action === 'update') {
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+            try {
+                const data = JSON.parse(body);
+                const room = rooms.get(data.roomId);
+                
+                if (room) {
+                    const player = room.players.find(p => p.id === data.playerId);
+                    if (player) {
+                        player.completedCells = data.completedCells;
+                        
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: true }));
+                    } else {
+                        res.writeHead(404);
+                        res.end(JSON.stringify({ success: false, error: 'Игрок не найден' }));
+                    }
+                } else {
+                    res.writeHead(404);
+                    res.end(JSON.stringify({ success: false, error: 'Комната не найдена' }));
+                }
+            } catch (err) {
+                res.writeHead(400);
+                res.end(JSON.stringify({ success: false, error: err.message }));
+            }
+        });
+    }
+    
+    // Покинуть комнату
+    else if (req.method === 'POST' && action === 'leave') {
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+            try {
+                const data = JSON.parse(body);
+                const room = rooms.get(data.roomId);
+                
+                if (room) {
+                    const index = room.players.findIndex(p => p.id === data.playerId);
+                    if (index !== -1) room.players.splice(index, 1);
+                    
+                    if (room.players.length === 0) {
+                        rooms.delete(data.roomId);
+                    }
+                }
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true }));
+            } catch (err) {
+                res.writeHead(400);
+                res.end(JSON.stringify({ success: false, error: err.message }));
+            }
+        });
+    }
+    
+    else {
+        res.writeHead(404);
+        res.end('Not found');
+    }
+}
+
+// Очистка старых комнат (каждые 10 минут)
+setInterval(() => {
+    const now = Date.now();
+    for (const [roomId, room] of rooms) {
+        if (now - room.createdAt > 3600000 && room.players.length === 0) {
+            rooms.delete(roomId);
+            console.log(`Очищена старая комната: ${roomId}`);
+        }
+    }
+}, 600000);
 
 server.listen(PORT, () => {
-    console.log(`Сервер запущен на порту ${PORT}`);
+    console.log(`✅ Сервер запущен на порту ${PORT}`);
     console.log(`http://localhost:${PORT}`);
 });
