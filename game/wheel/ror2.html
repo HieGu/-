@@ -44,6 +44,132 @@
         </div>
     </div>
 
+    <!-- Подвал с рекламой -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-ads">
+                <div class="footer-ad">
+                    <a href="https://www.twitch.tv/vladen69" target="_blank" class="footer-ad-link">
+                        <div class="footer-ad-icon">🎮</div>
+                        <div class="footer-ad-text">
+                            <h4>VLADEN69</h4>
+                            <p>Twitch стримы</p>
+                            <span class="footer-ad-button">Смотреть →</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="footer-ad">
+                    <a href="https://www.youtube.com/@v14d3n" target="_blank" class="footer-ad-link">
+                        <div class="footer-ad-icon">📺</div>
+                        <div class="footer-ad-text">
+                            <h4>V14D3N</h4>
+                            <p>YouTube канал</p>
+                            <span class="footer-ad-button">Смотреть →</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <p>© 2024 Challenge Wheels | Все права защищены</p>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        .footer {
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+            border-top: 3px solid #d98c2b;
+            margin-top: 3rem;
+            padding: 2rem 1rem 1rem 1rem;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-ads {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-ad {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+            width: 260px;
+        }
+        
+        .footer-ad:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-ad-link {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+        }
+        
+        .footer-ad-icon {
+            font-size: 2.5rem;
+        }
+        
+        .footer-ad-text h4 {
+            color: #d98c2b;
+            margin-bottom: 0.2rem;
+            font-size: 1rem;
+        }
+        
+        .footer-ad-text p {
+            color: #aaa;
+            font-size: 0.7rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .footer-ad-button {
+            display: inline-block;
+            background: #d98c2b;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.6rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        
+        .footer-ad-link:hover .footer-ad-button {
+            background: #b56a1a;
+        }
+        
+        .footer-copyright {
+            text-align: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-copyright p {
+            color: #888;
+            font-size: 0.75rem;
+        }
+        
+        @media (max-width: 700px) {
+            .footer-ad {
+                width: 100%;
+                max-width: 280px;
+            }
+            .footer-ad-link {
+                justify-content: center;
+            }
+        }
+    </style>
+
     <script src="../../js/wheel.js"></script>
     <script>
         const wheelsDataROR2 = [
