@@ -23,7 +23,6 @@ body {
     padding: 2rem;
 }
 
-/* Bento Grid */
 .bento-grid {
     max-width: 1200px;
     margin: 0 auto;
@@ -104,7 +103,19 @@ body {
     background: var(--accent-dark);
 }
 
-/* Страницы игр */
+.disabled-btn {
+    background: #999 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+    transform: none !important;
+}
+
+.disabled-btn:hover {
+    background: #999 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
 .game-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -133,7 +144,6 @@ h1 {
     color: var(--accent-dark);
 }
 
-/* Стили для колеса */
 .wheel-container {
     display: flex;
     flex-direction: column;
@@ -326,50 +336,4 @@ select {
         width: 80px;
         height: 80px;
     }
-}
-/* Стили для отключенной кнопки */
-.disabled-btn {
-    background: #999 !important;
-    cursor: not-allowed !important;
-    opacity: 0.6;
-    transform: none !important;
-}
-
-.disabled-btn:hover {
-    background: #999 !important;
-    transform: none !important;
-    box-shadow: none !important;
-}
-
-.game-card.disabled {
-    opacity: 0.7;
-    filter: grayscale(0.2);
-}
-/* Стили для кнопок режимов игры */
-.game-mode-buttons {
-    display: flex;
-    gap: 0.8rem;
-    justify-content: center;
-    margin-top: 1.2rem;
-    flex-wrap: wrap;
-}
-
-.mode-btn {
-    margin-top: 0 !important;
-    padding: 0.6rem 1.2rem !important;
-    font-size: 0.9rem !important;
-    background: #4a6fa5 !important;
-}
-
-.mode-btn:hover {
-    background: #3d5a8a !important;
-    transform: translateY(-2px);
-}
-
-.mode-btn:first-child {
-    background: #d98c2b !important;
-}
-
-.mode-btn:first-child:hover {
-    background: #b56a1a !important;
 }
