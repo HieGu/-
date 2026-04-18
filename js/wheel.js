@@ -1,11 +1,9 @@
-// Универсальный модуль для работы колеса и истории (localStorage)
-
 let spinning = false;
 let animationId = null;
 let currentRotation = 0;
 let targetRotation = 0;
 let spinStartTime = 0;
-let spinDuration = 2000; // 2 секунды вращения
+let spinDuration = 2000;
 
 function initWheel(wheelsArray, gameKey) {
     let currentWheelIndex = 0;
@@ -14,7 +12,6 @@ function initWheel(wheelsArray, gameKey) {
     let canvas = document.getElementById('wheelCanvas');
     let ctx = canvas ? canvas.getContext('2d') : null;
     
-    // Размер canvas
     let size = 500;
     if (canvas) {
         canvas.width = size;
@@ -32,7 +29,6 @@ function initWheel(wheelsArray, gameKey) {
     const historyList = document.getElementById('historyList');
     const clearBtn = document.getElementById('clearHistoryBtn');
 
-    // Новая палитра однотонных, но различимых цветов (пастельные тона)
     const colors = [
         '#FFB3BA', '#B5EAD7', '#FFDAC1', '#E2F0CB', '#B5E3FF',
         '#FFC8DD', '#C7E9FB', '#FFF5BA', '#D4B8D4', '#FFB7B2',
@@ -40,7 +36,6 @@ function initWheel(wheelsArray, gameKey) {
         '#FFDFBF', '#BDE0FE', '#FBC8B5', '#C1E1C1', '#FFB5A7'
     ];
 
-    // Загрузка данных из localStorage
     function loadData() {
         const saved = localStorage.getItem(`wheel_${gameKey}`);
         if (saved) {
@@ -106,7 +101,6 @@ function initWheel(wheelsArray, gameKey) {
         return `Колесо ${idx+1}`;
     }
 
-    // Улучшенная функция определения выбранного элемента по углу вращения
     function getSelectedItem(rotation) {
         const items = getCurrentWheelItems();
         if (items.length === 0) return null;
@@ -124,13 +118,10 @@ function initWheel(wheelsArray, gameKey) {
         
         return {
             index: selectedIndex,
-            item: items[selectedIndex],
-            angle: segmentAngle,
-            step: angleStep
+            item: items[selectedIndex]
         };
     }
 
-    // Отрисовка колеса с однотонными сегментами
     function drawWheel() {
         if (!ctx) return;
         
@@ -197,7 +188,6 @@ function initWheel(wheelsArray, gameKey) {
             ctx.restore();
         }
         
-        // Центральный круг
         ctx.beginPath();
         ctx.arc(centerX, centerY, 25, 0, Math.PI * 2);
         ctx.fillStyle = '#ffffff';
@@ -206,21 +196,18 @@ function initWheel(wheelsArray, gameKey) {
         ctx.lineWidth = 4;
         ctx.stroke();
         
-        // Центральная иконка (простой круг вместо эмодзи)
         ctx.fillStyle = '#d98c2b';
         ctx.font = 'bold 28px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('?', centerX, centerY);
         
-        // Внутреннее кольцо
         ctx.beginPath();
         ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
         ctx.strokeStyle = '#d98c2b';
         ctx.lineWidth = 2;
         ctx.stroke();
         
-        // Подсветка выбранного сектора
         if (!spinning) {
             const selected = getSelectedItem(currentRotation);
             if (selected && selected.index !== undefined) {
@@ -243,7 +230,6 @@ function initWheel(wheelsArray, gameKey) {
         }
     }
     
-    // Анимация вращения
     function animateSpin(now) {
         const elapsed = now - spinStartTime;
         const progress = Math.min(1, elapsed / spinDuration);
@@ -315,7 +301,6 @@ function initWheel(wheelsArray, gameKey) {
         }
     }
     
-    // Event Listeners
     if (spinBtn) spinBtn.addEventListener('click', spin);
     if (clearBtn) clearBtn.addEventListener('click', clearHistory);
     if (wheelSelect) {
