@@ -10,11 +10,15 @@ body {
     min-height: 100vh;
     padding: 2rem;
     color: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .bingo-container {
-    max-width: 1200px;
+    max-width: 900px;
     margin: 0 auto;
+    width: 100%;
 }
 
 .header {
@@ -23,14 +27,14 @@ body {
 }
 
 .header h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
     color: #ff6b6b;
     margin-bottom: 0.5rem;
 }
 
 .header p {
     color: #aaa;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
 }
 
 .back-btn {
@@ -46,21 +50,92 @@ body {
     color: #ff9999;
 }
 
-.controls {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
+/* Seed container styles */
+.seed-container {
+    background: #2a2a4a;
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
 }
 
+.seed-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.seed-input {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.seed-input input {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    border: none;
+    background: #3a3a5a;
+    color: white;
+    font-size: 1rem;
+    text-align: center;
+    width: 150px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.seed-input input:focus {
+    outline: none;
+    border: 2px solid #ff8c42;
+    background: #4a4a6a;
+}
+
+.seed-code {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ff8c42;
+    background: #1a1a2e;
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    display: inline-block;
+    margin: 0.5rem 0;
+    font-family: monospace;
+    letter-spacing: 5px;
+}
+
+.seed-info {
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #aaa;
+}
+
+.timer {
+    color: #ff8c42;
+    font-weight: bold;
+}
+
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Button styles */
 .btn {
     background: #ff6b6b;
     color: white;
     border: none;
-    padding: 0.8rem 1.5rem;
+    padding: 0.6rem 1.2rem;
     border-radius: 2rem;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: bold;
     cursor: pointer;
     transition: transform 0.2s, background 0.2s;
@@ -83,6 +158,21 @@ body {
     background: #5a5a7a;
 }
 
+.btn-small {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+/* Controls */
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+/* Bingo grid */
 .bingo-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -96,8 +186,8 @@ body {
 .bingo-cell {
     background: #3a3a5a;
     border-radius: 0.75rem;
-    padding: 1rem;
-    min-height: 100px;
+    padding: 0.8rem;
+    min-height: 90px;
     display: flex;
     flex-direction: column;
     cursor: pointer;
@@ -121,49 +211,51 @@ body {
     position: absolute;
     top: 5px;
     right: 10px;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     color: #ffd700;
     font-weight: bold;
 }
 
 .cell-number {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: #aaa;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
     font-weight: bold;
 }
 
 .cell-text {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     line-height: 1.3;
     flex: 1;
 }
 
+/* Stats */
 .stats {
     background: #2a2a4a;
     padding: 1rem;
     border-radius: 1rem;
     text-align: center;
-    margin-bottom: 1rem;
+    margin-top: 1rem;
 }
 
 .stats h3 {
-    margin-bottom: 0.5rem;
     color: #ff6b6b;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
 }
 
 .bingo-lines {
     display: flex;
     justify-content: center;
-    gap: 2rem;
+    gap: 1rem;
     flex-wrap: wrap;
 }
 
 .line-stat {
     background: #3a3a5a;
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.8rem;
     border-radius: 2rem;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 .line-stat.completed {
@@ -171,11 +263,12 @@ body {
     color: #ffd700;
 }
 
+/* Message */
 .message {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: #ff6b6b;
+    background: #ff8c42;
     color: white;
     padding: 0.8rem 1.2rem;
     border-radius: 2rem;
@@ -194,10 +287,7 @@ body {
     }
 }
 
-.hidden {
-    display: none !important;
-}
-
+/* Flash animation */
 @keyframes flash {
     0% { background: #ff8c42; }
     100% { background: #3a3a5a; }
@@ -207,22 +297,113 @@ body {
     animation: flash 0.5s ease;
 }
 
-@media (max-width: 768px) {
+/* Footer styles - сливается с фоном */
+.bingo-footer {
+    width: 100%;
+    max-width: 900px;
+    margin-top: 2rem;
+    padding: 1.5rem 1rem 1rem 1rem;
+    background: transparent;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-content {
+    text-align: center;
+}
+
+.footer-text p {
+    color: #ff8c42;
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.footer-link {
+    display: flex;
+    gap: 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-link a {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.2s;
+    display: flex;
+    gap: 0.3rem;
+}
+
+.footer-link a:hover {
+    color: #ff8c42;
+}
+
+.link-name {
+    font-weight: bold;
+    color: #ff8c42;
+}
+
+.link-platform {
+    color: #aaa;
+}
+
+.footer-link a:hover .link-platform {
+    color: #ff8c42;
+}
+
+.footer-copyright p {
+    color: #555;
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
     body {
         padding: 1rem;
     }
     .bingo-cell {
-        padding: 0.5rem;
-        min-height: 70px;
+        padding: 0.4rem;
+        min-height: 65px;
     }
     .cell-text {
-        font-size: 0.65rem;
-    }
-    .cell-number {
         font-size: 0.6rem;
     }
+    .cell-number {
+        font-size: 0.55rem;
+    }
+    .seed-code {
+        font-size: 1.3rem;
+        letter-spacing: 3px;
+    }
+    .seed-controls {
+        flex-direction: column;
+    }
+    .seed-input {
+        width: 100%;
+        justify-content: center;
+    }
     .btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    .footer-links {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .footer-link {
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }
