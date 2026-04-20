@@ -4,6 +4,21 @@ const path = require('path');
 
 const PORT = process.env.PORT || 3000;
 
+// Хранилище сидов (в памяти сервера)
+// Структура: { seed: { board: [], expiresAt: timestamp } }
+const seeds = new Map();
+
+// Очистка просроченных сидов каждые 10 минут
+setInterval(() => {
+    const now = Date.now();
+    for (const [seed, data] of seeds) {
+        if (data.expiresAt < now) {
+            seeds.delete(seed);
+            console.log(`Сид ${seed} удалён (истек срок)`);
+        }
+    }
+}, 600000); // 10 минут
+
 const mimeTypes = {
     '.html': 'text/html',
     '.css': 'text/css',
@@ -16,11 +31,8 @@ const mimeTypes = {
     '.webmanifest': 'application/manifest+json'
 };
 
-// Хранилище комнат в памяти сервера
-const rooms = new Map();
-
 const server = http.createServer((req, res) => {
-    // Добавляем CORS заголовки
+    // CORS заголовки
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -31,7 +43,7 @@ const server = http.createServer((req, res) => {
         return;
     }
     
-    // API для комнат
+    // API для сидов
     if (req.url.startsWith('/api/')) {
         handleApiRequest(req, res);
         return;
@@ -64,30 +76,30 @@ function handleApiRequest(req, res) {
     const urlParts = req.url.split('/');
     const action = urlParts[2];
     
-    // Создание комнаты
+    // Создание сида (генерация нового поля)
     if (req.method === 'POST' && action === 'create') {
         let body = '';
         req.on('data', chunk => { body += chunk; });
         req.on('end', () => {
             try {
                 const data = JSON.parse(body);
-                const roomId = Math.floor(1000 + Math.random() * 9000).toString();
-                const playerId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
+                // Генерируем 6-значный сид
+                const seed = Math.floor(100000 + Math.random() * 900000).toString();
+                const expiresAt = Date.now() + (5 * 60 * 60 * 1000); // 5 часов
                 
-                rooms.set(roomId, {
-                    players: [{ id: playerId, name: data.playerName, completedCells: new Array(25).fill(false) }],
+                seeds.set(seed, {
                     board: data.board,
-                    maxPlayers: 2,
+                    expiresAt: expiresAt,
                     createdAt: Date.now()
                 });
+                
+                console.log(`Сид ${seed} создан, истекает через 5 часов`);
                 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ 
                     success: true, 
-                    roomId: roomId, 
-                    playerId: playerId,
-                    board: data.board,
-                    players: [{ id: playerId, name: data.playerName, completedCells: new Array(25).fill(false) }]
+                    seed: seed,
+                    expiresIn: 5 * 60 * 60 * 1000
                 }));
             } catch (err) {
                 res.writeHead(400);
@@ -96,111 +108,64 @@ function handleApiRequest(req, res) {
         });
     }
     
-    // Присоединение к комнате
-    else if (req.method === 'POST' && action === 'join') {
-        let body = '';
-        req.on('data', chunk => { body += chunk; });
-        req.on('end', () => {
-            try {
-                const data = JSON.parse(body);
-                const room = rooms.get(data.roomId);
-                
-                if (room && room.players.length < room.maxPlayers) {
-                    const playerId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
-                    room.players.push({ id: playerId, name: data.playerName, completedCells: new Array(25).fill(false) });
-                    
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ 
-                        success: true, 
-                        playerId: playerId,
-                        board: room.board,
-                        players: room.players.map(p => ({ id: p.id, name: p.name, completedCells: p.completedCells }))
-                    }));
-                } else {
-                    res.writeHead(400);
-                    res.end(JSON.stringify({ success: false, error: room ? 'Комната заполнена' : 'Комната не найдена' }));
-                }
-            } catch (err) {
-                res.writeHead(400);
-                res.end(JSON.stringify({ success: false, error: err.message }));
-            }
-        });
-    }
-    
-    // Получение состояния комнаты (для синхронизации)
-    else if (req.method === 'GET' && action === 'sync') {
-        const roomId = urlParts[3];
-        const room = rooms.get(roomId);
+    // Получение поля по сиду
+    else if (req.method === 'GET' && action === 'load') {
+        const seed = urlParts[3];
+        const seedData = seeds.get(seed);
         
-        if (room) {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-                success: true,
-                players: room.players.map(p => ({ id: p.id, name: p.name, completedCells: p.completedCells })),
-                board: room.board
-            }));
+        if (seedData) {
+            const now = Date.now();
+            if (seedData.expiresAt > now) {
+                const timeLeft = seedData.expiresAt - now;
+                const hoursLeft = Math.floor(timeLeft / (60 * 60 * 1000));
+                const minutesLeft = Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000));
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ 
+                    success: true, 
+                    board: seedData.board,
+                    expiresIn: { hours: hoursLeft, minutes: minutesLeft }
+                }));
+                console.log(`Сид ${seed} загружен (осталось ${hoursLeft}ч ${minutesLeft}м)`);
+            } else {
+                seeds.delete(seed);
+                res.writeHead(404);
+                res.end(JSON.stringify({ success: false, error: 'Сид истёк (5 часов прошло)' }));
+                console.log(`Сид ${seed} истёк`);
+            }
         } else {
             res.writeHead(404);
-            res.end(JSON.stringify({ success: false, error: 'Комната не найдена' }));
+            res.end(JSON.stringify({ success: false, error: 'Сид не найден' }));
+            console.log(`Сид ${seed} не найден`);
         }
     }
     
-    // Обновление состояния игрока
-    else if (req.method === 'POST' && action === 'update') {
-        let body = '';
-        req.on('data', chunk => { body += chunk; });
-        req.on('end', () => {
-            try {
-                const data = JSON.parse(body);
-                const room = rooms.get(data.roomId);
-                
-                if (room) {
-                    const player = room.players.find(p => p.id === data.playerId);
-                    if (player) {
-                        player.completedCells = data.completedCells;
-                        
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ success: true }));
-                    } else {
-                        res.writeHead(404);
-                        res.end(JSON.stringify({ success: false, error: 'Игрок не найден' }));
-                    }
-                } else {
-                    res.writeHead(404);
-                    res.end(JSON.stringify({ success: false, error: 'Комната не найдена' }));
-                }
-            } catch (err) {
-                res.writeHead(400);
-                res.end(JSON.stringify({ success: false, error: err.message }));
-            }
-        });
-    }
-    
-    // Покинуть комнату
-    else if (req.method === 'POST' && action === 'leave') {
-        let body = '';
-        req.on('data', chunk => { body += chunk; });
-        req.on('end', () => {
-            try {
-                const data = JSON.parse(body);
-                const room = rooms.get(data.roomId);
-                
-                if (room) {
-                    const index = room.players.findIndex(p => p.id === data.playerId);
-                    if (index !== -1) room.players.splice(index, 1);
-                    
-                    if (room.players.length === 0) {
-                        rooms.delete(data.roomId);
-                    }
-                }
-                
+    // Получение информации о сиде (время жизни)
+    else if (req.method === 'GET' && action === 'info') {
+        const seed = urlParts[3];
+        const seedData = seeds.get(seed);
+        
+        if (seedData) {
+            const now = Date.now();
+            if (seedData.expiresAt > now) {
+                const timeLeft = seedData.expiresAt - now;
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: true }));
-            } catch (err) {
-                res.writeHead(400);
-                res.end(JSON.stringify({ success: false, error: err.message }));
+                res.end(JSON.stringify({ 
+                    success: true, 
+                    exists: true,
+                    expiresAt: seedData.expiresAt,
+                    timeLeftMs: timeLeft,
+                    createdAt: seedData.createdAt
+                }));
+            } else {
+                seeds.delete(seed);
+                res.writeHead(200);
+                res.end(JSON.stringify({ success: true, exists: false, reason: 'expired' }));
             }
-        });
+        } else {
+            res.writeHead(200);
+            res.end(JSON.stringify({ success: true, exists: false, reason: 'not_found' }));
+        }
     }
     
     else {
@@ -209,18 +174,8 @@ function handleApiRequest(req, res) {
     }
 }
 
-// Очистка старых комнат (каждые 10 минут)
-setInterval(() => {
-    const now = Date.now();
-    for (const [roomId, room] of rooms) {
-        if (now - room.createdAt > 3600000 && room.players.length === 0) {
-            rooms.delete(roomId);
-            console.log(`Очищена старая комната: ${roomId}`);
-        }
-    }
-}, 600000);
-
 server.listen(PORT, () => {
-    console.log(`✅ Сервер запущен на порту ${PORT}`);
+    console.log(`Сервер запущен на порту ${PORT}`);
+    console.log(`Система сидов активна (время жизни: 5 часов)`);
     console.log(`http://localhost:${PORT}`);
 });
