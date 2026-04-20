@@ -1,8 +1,6 @@
 {
   "name": "challenge-wheels",
   "version": "1.0.0",
-  "description": "Challenge Wheels with WebSocket Bingo",
-  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
