@@ -120,30 +120,29 @@ function loadBoard() {
     }
 }
 
+// Замените функции createSeed и loadSeed на эти:
+
 async function createSeed() {
-    try {
-        const response = await fetch('/api/create', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ board: currentBoard })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            currentSeed = data.seed;
-            localStorage.setItem('ror2_bingo_current_seed', currentSeed);
-            updateSeedDisplay();
-            showMessage(`Сид создан: ${currentSeed} (действует 5 часов)`);
-            
-            navigator.clipboard.writeText(currentSeed);
-            showMessage(`Сид скопирован в буфер обмена`);
-        } else {
-            showMessage('Ошибка создания сида', true);
-        }
-    } catch (err) {
-        showMessage('Ошибка соединения с сервером', true);
-    }
+    // Генерируем случайный сид
+    const seed = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Сохраняем поле в localStorage по ключу сида
+    const boardData = {
+        board: currentBoard,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + (5 * 60 * 60 * 1000) // 5 часов
+    };
+    localStorage.setItem(`seed_${seed}`, JSON.stringify(boardData));
+    
+    currentSeed = seed;
+    localStorage.setItem('ror2_bingo_current_seed', currentSeed);
+    updateSeedDisplay();
+    
+    // Создаем ссылку с сидом в URL
+    const url = `${window.location.origin}${window.location.pathname}?seed=${seed}`;
+    navigator.clipboard.writeText(url);
+    
+    showMessage(`Сид ${seed} создан! Ссылка скопирована. Действует 5 часов.`);
 }
 
 async function loadSeed() {
@@ -155,11 +154,14 @@ async function loadSeed() {
         return;
     }
     
-    try {
-        const response = await fetch(`/api/load/${seed}`);
-        const data = await response.json();
+    // Пытаемся загрузить поле из localStorage
+    const savedData = localStorage.getItem(`seed_${seed}`);
+    
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        const now = Date.now();
         
-        if (data.success) {
+        if (data.expiresAt > now) {
             currentBoard = data.board;
             currentSeed = seed;
             completedCells = new Array(TOTAL_CELLS).fill(false);
@@ -169,18 +171,55 @@ async function loadSeed() {
             renderGrid();
             updateSeedDisplay();
             
-            const timeText = `${data.expiresIn.hours}ч ${data.expiresIn.minutes}м`;
-            showMessage(`Поле загружено. Сид: ${seed} (действует ${timeText})`);
+            const hoursLeft = Math.floor((data.expiresAt - now) / (60 * 60 * 1000));
+            const minutesLeft = Math.floor(((data.expiresAt - now) % (60 * 60 * 1000)) / (60 * 1000));
+            showMessage(`Поле загружено! Сид: ${seed} (действует ещё ${hoursLeft}ч ${minutesLeft}м)`);
             
             seedInput.value = '';
         } else {
-            showMessage(data.error || 'Сид не найден или истек', true);
+            localStorage.removeItem(`seed_${seed}`);
+            showMessage('Сид истёк (5 часов прошло)', true);
         }
-    } catch (err) {
-        showMessage('Ошибка загрузки сида', true);
+    } else {
+        showMessage('Сид не найден', true);
     }
 }
 
+// Добавьте функцию для загрузки сида из URL при загрузке страницы
+function loadSeedFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const seed = urlParams.get('seed');
+    
+    if (seed) {
+        const savedData = localStorage.getItem(`seed_${seed}`);
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            if (data.expiresAt > Date.now()) {
+                currentBoard = data.board;
+                currentSeed = seed;
+                completedCells = new Array(TOTAL_CELLS).fill(false);
+                saveBoard();
+                saveProgress();
+                localStorage.setItem('ror2_bingo_current_seed', currentSeed);
+                renderGrid();
+                updateSeedDisplay();
+                showMessage(`Автоматически загружено поле по сиду: ${seed}`);
+            }
+        }
+        // Очищаем URL от параметров
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+}
+
+// В функцию init() добавьте вызов:
+function init() {
+    loadBoard();
+    loadProgress();
+    renderGrid();
+    loadSeedFromURL(); // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
+    
+    // ... остальной код
+}
 function updateSeedDisplay() {
     const seedPanel = document.getElementById('seedPanel');
     const mainMenu = document.getElementById('mainMenu');
