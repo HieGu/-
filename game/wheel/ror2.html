@@ -10,7 +10,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="../../icon/favicon-16x16.png">
     <link rel="manifest" href="../../icon/site.webmanifest">
     
-    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/styleror2.css">
 </head>
 <body>
     <div class="game-container">
@@ -44,47 +44,40 @@
         </div>
     </div>
 
-<!-- Подвал с рекламой -->
-<div style="background: linear-gradient(135deg, #fff9ef 0%, #fdf6e3 100%); border-top: 1px solid #f0e0c0; margin-top: 3rem; padding: 2rem 1rem 1rem 1rem;">
-    <div style="max-width: 1200px; margin: 0 auto;">
-        <div style="text-align: center; margin-bottom: 1.5rem;">
-            <p style="color: #b56a1a; font-size: 1rem; font-weight: bold; margin: 0;">Подписывайтесь на этих ребят</p>
-        </div>
-        <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-            <!-- VLADEN69 / V14D3N -->
-            <div style="background: #fff9ef; border: 1px solid #f0e0c0; border-radius: 1rem; transition: all 0.3s ease; width: 260px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <div style="padding: 1rem; text-align: center;">
-                    <div style="font-weight: bold; color: #d98c2b; margin-bottom: 0.3rem; font-size: 1rem;">VLADEN69</div>
-                    <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <a href="https://www.twitch.tv/vladen69" target="_blank" rel="noopener noreferrer" style="color: #d98c2b; font-size: 0.7rem; text-decoration: none;">Twitch</a>
-                        <span style="color: #ddd;">|</span>
-                        <a href="https://www.youtube.com/@v14d3n" target="_blank" rel="noopener noreferrer" style="color: #d98c2b; font-size: 0.7rem; text-decoration: none;">YouTube</a>
-                    </div>
-                    <div style="margin-top: 0.5rem;">
-                        <a href="https://www.twitch.tv/vladen69" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: #d98c2b; color: white; padding: 0.2rem 0.8rem; border-radius: 2rem; font-size: 0.65rem; font-weight: bold; text-decoration: none;">Подписаться</a>
-                    </div>
+    <!-- Footer с рекламой - теперь сливается с фоном -->
+    <footer class="ror2-footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                <p>Подписывайтесь на этих ребят</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-link">
+                    <a href="https://www.twitch.tv/vladen69" target="_blank" rel="noopener noreferrer">
+                        <span class="link-name">VLADEN69</span>
+                        <span class="link-platform">Twitch</span>
+                    </a>
+                    <a href="https://www.youtube.com/@v14d3n" target="_blank" rel="noopener noreferrer">
+                        <span class="link-name">VLADEN69</span>
+                        <span class="link-platform">YouTube</span>
+                    </a>
+                </div>
+                <div class="footer-link">
+                    <a href="https://www.twitch.tv/tijoe" target="_blank" rel="noopener noreferrer">
+                        <span class="link-name">Tijoe</span>
+                        <span class="link-platform">Twitch</span>
+                    </a>
+                    <a href="https://www.youtube.com/@TijoeVideos" target="_blank" rel="noopener noreferrer">
+                        <span class="link-name">Tijoe</span>
+                        <span class="link-platform">YouTube</span>
+                    </a>
                 </div>
             </div>
-            <!-- Tijoe -->
-            <div style="background: #fff9ef; border: 1px solid #f0e0c0; border-radius: 1rem; transition: all 0.3s ease; width: 260px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <div style="padding: 1rem; text-align: center;">
-                    <div style="font-weight: bold; color: #d98c2b; margin-bottom: 0.3rem; font-size: 1rem;">Tijoe</div>
-                    <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <a href="https://www.twitch.tv/tijoe" target="_blank" rel="noopener noreferrer" style="color: #d98c2b; font-size: 0.7rem; text-decoration: none;">Twitch</a>
-                        <span style="color: #ddd;">|</span>
-                        <a href="https://www.youtube.com/@TijoeVideos" target="_blank" rel="noopener noreferrer" style="color: #d98c2b; font-size: 0.7rem; text-decoration: none;">YouTube</a>
-                    </div>
-                    <div style="margin-top: 0.5rem;">
-                        <a href="https://www.twitch.tv/tijoe" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: #d98c2b; color: white; padding: 0.2rem 0.8rem; border-radius: 2rem; font-size: 0.65rem; font-weight: bold; text-decoration: none;">Подписаться</a>
-                    </div>
-                </div>
+            <div class="footer-copyright">
+                <p>© 2025 Challenge Wheels | Все права защищены</p>
             </div>
         </div>
-        <div style="text-align: center; padding-top: 1rem; border-top: 1px solid #f0e0c0;">
-            <p style="color: #aaa; font-size: 0.75rem;">© 2025 Challenge Wheels | Все права защищены</p>
-        </div>
-    </div>
-</div>
+    </footer>
+
     <script src="../../js/wheel.js"></script>
     <script>
         const wheelsDataROR2 = [
