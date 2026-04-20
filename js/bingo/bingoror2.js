@@ -123,14 +123,23 @@ function loadBoard() {
 // Замените функции createSeed и loadSeed на эти:
 
 async function createSeed() {
-    // Генерируем случайный сид
-    const seed = Math.floor(100000 + Math.random() * 900000).toString();
+    // Кодируем поле бинго в строку для передачи в URL
+    const boardString = JSON.stringify(currentBoard);
+    const encodedBoard = btoa(encodeURIComponent(boardString));
     
-    // Сохраняем поле в localStorage по ключу сида
+    // Создаем короткий сид из первых 6 символов хеша
+    let hash = 0;
+    for (let i = 0; i < encodedBoard.length; i++) {
+        hash = ((hash << 5) - hash) + encodedBoard.charCodeAt(i);
+        hash = hash & hash;
+    }
+    const seed = Math.abs(hash).toString(36).substring(0, 6).toUpperCase();
+    
+    // Сохраняем поле в localStorage с этим сидом
     const boardData = {
         board: currentBoard,
         createdAt: Date.now(),
-        expiresAt: Date.now() + (5 * 60 * 60 * 1000) // 5 часов
+        expiresAt: Date.now() + (5 * 60 * 60 * 1000)
     };
     localStorage.setItem(`seed_${seed}`, JSON.stringify(boardData));
     
@@ -147,7 +156,7 @@ async function createSeed() {
 
 async function loadSeed() {
     const seedInput = document.getElementById('seedInput');
-    const seed = seedInput.value.trim();
+    const seed = seedInput.value.trim().toUpperCase();
     
     if (!seed || seed.length !== 6) {
         showMessage('Введите 6-значный сид', true);
@@ -181,11 +190,11 @@ async function loadSeed() {
             showMessage('Сид истёк (5 часов прошло)', true);
         }
     } else {
-        showMessage('Сид не найден', true);
+        showMessage('Сид не найден. Убедитесь, что вы правильно скопировали код.', true);
     }
 }
 
-// Добавьте функцию для загрузки сида из URL при загрузке страницы
+// Функция для загрузки сида из URL
 function loadSeedFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
     const seed = urlParams.get('seed');
@@ -204,7 +213,13 @@ function loadSeedFromURL() {
                 renderGrid();
                 updateSeedDisplay();
                 showMessage(`Автоматически загружено поле по сиду: ${seed}`);
+            } else {
+                localStorage.removeItem(`seed_${seed}`);
+                showMessage('Сид истёк (5 часов прошло)', true);
             }
+        } else {
+            // Если сид не найден в localStorage, пробуем восстановить из ссылки
+            showMessage(`Сид ${seed} не найден. Возможно, он был создан на другом устройстве.`, true);
         }
         // Очищаем URL от параметров
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -216,9 +231,22 @@ function init() {
     loadBoard();
     loadProgress();
     renderGrid();
-    loadSeedFromURL(); // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
+    loadSeedFromURL();
     
-    // ... остальной код
+    // Остальной код инициализации кнопок...
+    const createSeedBtn = document.getElementById('createSeedBtn');
+    const loadSeedBtn = document.getElementById('loadSeedBtn');
+    const copySeedBtn = document.getElementById('copySeedBtn');
+    const clearSeedBtn = document.getElementById('clearSeedBtn');
+    const newGameBtn = document.getElementById('newGameBtn');
+    const resetBtn = document.getElementById('resetProgressBtn');
+    
+    if (createSeedBtn) createSeedBtn.onclick = createSeed;
+    if (loadSeedBtn) loadSeedBtn.onclick = loadSeed;
+    if (copySeedBtn) copySeedBtn.onclick = copySeed;
+    if (clearSeedBtn) clearSeedBtn.onclick = clearSeed;
+    if (newGameBtn) newGameBtn.onclick = newGame;
+    if (resetBtn) resetBtn.onclick = resetProgress;
 }
 function updateSeedDisplay() {
     const seedPanel = document.getElementById('seedPanel');
