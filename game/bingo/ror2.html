@@ -11,343 +11,38 @@
     <link rel="manifest" href="../../icon/site.webmanifest">
     
     <link rel="stylesheet" href="../../css/bingo/stylebingoror2.css">
-    
-    <style>
-        /* Дополнительные стили для лобби */
-        .lobby-container {
-            background: #2a2a4a;
-            border-radius: 1rem;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .room-controls {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .room-input {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        
-        .room-input input {
-            padding: 0.5rem 1rem;
-            border-radius: 2rem;
-            border: none;
-            background: #3a3a5a;
-            color: white;
-            font-size: 1rem;
-            text-align: center;
-            width: 130px;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-        
-        .room-input input:focus {
-            outline: none;
-            border: 2px solid #ff8c42;
-            background: #4a4a6a;
-        }
-        
-        .room-code {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #ff8c42;
-            background: #1a1a2e;
-            padding: 0.5rem 1rem;
-            border-radius: 1rem;
-            display: inline-block;
-            margin: 0.5rem 0;
-            font-family: monospace;
-            letter-spacing: 5px;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 0.5rem;
-        }
-        
-        .small-btn {
-            padding: 0.3rem 0.8rem;
-            font-size: 0.8rem;
-            background: #4a4a6a;
-        }
-        
-        .players-list {
-            background: #1a1a2e;
-            border-radius: 0.5rem;
-            padding: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        
-        .players-list strong {
-            color: #ff8c42;
-            display: block;
-            margin-bottom: 0.3rem;
-        }
-        
-        .player-tag {
-            display: inline-block;
-            padding: 0.3rem 0.7rem;
-            border-radius: 1rem;
-            margin: 0.2rem;
-            font-size: 0.8rem;
-            background: #3a3a5a;
-        }
-        
-        .player-tag.you {
-            background: #ff8c42;
-            color: white;
-        }
-        
-        .hidden {
-            display: none !important;
-        }
-        
-        /* Стили для маркеров игроков */
-        .player-markers {
-            display: flex;
-            gap: 0.2rem;
-            margin-top: 0.3rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .marker {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: white;
-            font-weight: bold;
-        }
-        
-        .btn {
-            background: #ff6b6b;
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 2rem;
-            font-size: 0.9rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
-        }
-        
-        .btn:hover {
-            background: #ff5252;
-            transform: translateY(-2px);
-        }
-        
-        .btn-secondary {
-            background: #4a4a6a;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a5a7a;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin: 1.5rem 0;
-            flex-wrap: wrap;
-        }
-        
-        .bingo-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .header h1 {
-            font-size: 2rem;
-            color: #ff6b6b;
-            margin-bottom: 0.5rem;
-        }
-        
-        .header p {
-            color: #aaa;
-            font-size: 0.9rem;
-        }
-        
-        .stats {
-            background: #2a2a4a;
-            padding: 1rem;
-            border-radius: 1rem;
-            text-align: center;
-            margin-top: 1rem;
-        }
-        
-        .stats h3 {
-            color: #ff6b6b;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-        
-        .line-stat {
-            background: #3a3a5a;
-            padding: 0.5rem 1rem;
-            border-radius: 2rem;
-            font-size: 0.9rem;
-            display: inline-block;
-        }
-        
-        /* Стили для подвала */
-        .footer {
-            background: linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 100%);
-            border-top: 3px solid #ff6b6b;
-            margin-top: 3rem;
-            padding: 2rem 1rem 1rem 1rem;
-        }
-        
-        .footer-content {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        
-        .footer-ads {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
-        }
-        
-        .footer-ad {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 1rem;
-            transition: all 0.3s ease;
-            width: 260px;
-        }
-        
-        .footer-ad:hover {
-            transform: translateY(-4px);
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .footer-ad-link {
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-        }
-        
-        .footer-ad-icon {
-            font-size: 2.5rem;
-        }
-        
-        .footer-ad-text h4 {
-            color: #ff6b6b;
-            margin-bottom: 0.2rem;
-            font-size: 1rem;
-        }
-        
-        .footer-ad-text p {
-            color: #aaa;
-            font-size: 0.7rem;
-            margin-bottom: 0.3rem;
-        }
-        
-        .footer-ad-button {
-            display: inline-block;
-            background: #ff6b6b;
-            color: white;
-            padding: 0.2rem 0.6rem;
-            border-radius: 2rem;
-            font-size: 0.6rem;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        
-        .footer-ad-link:hover .footer-ad-button {
-            background: #ff5252;
-        }
-        
-        .footer-copyright {
-            text-align: center;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .footer-copyright p {
-            color: #666;
-            font-size: 0.75rem;
-        }
-        
-        @media (max-width: 700px) {
-            .room-controls {
-                flex-direction: column;
-            }
-            .room-input {
-                width: 100%;
-                justify-content: center;
-            }
-            .room-code {
-                font-size: 1.5rem;
-                letter-spacing: 3px;
-            }
-            .footer-ad {
-                width: 100%;
-                max-width: 280px;
-            }
-            .footer-ad-link {
-                justify-content: center;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="bingo-container">
         <a href="../../index.html" class="back-btn">← Назад к играм</a>
         
-        <!-- Лобби для создания/присоединения к комнате -->
-        <div class="lobby-container">
+        <!-- Seed panel -->
+        <div class="seed-container">
             <div id="mainMenu">
-                <div class="room-controls">
-                    <button class="btn" id="createRoomBtn">Создать комнату</button>
-                    <div class="room-input">
-                        <input type="text" id="roomIdInput" placeholder="Код комнаты" maxlength="4" style="text-transform:uppercase">
-                        <button class="btn btn-secondary" id="joinRoomBtn">Присоединиться</button>
+                <div class="seed-controls">
+                    <button class="btn" id="createSeedBtn">Создать сид</button>
+                    <div class="seed-input">
+                        <input type="text" id="seedInput" placeholder="Введите сид" maxlength="6" style="text-transform:uppercase">
+                        <button class="btn btn-secondary" id="loadSeedBtn">Загрузить сид</button>
                     </div>
                 </div>
             </div>
             
-            <div id="roomPanel" class="hidden">
+            <div id="seedPanel" class="hidden">
                 <div style="text-align: center;">
-                    <div class="room-code" id="roomCode"></div>
+                    <div class="seed-code" id="seedCode"></div>
                     <div class="button-group">
-                        <button class="btn small-btn" id="copyCodeBtn">Копировать код</button>
-                        <button class="btn small-btn btn-secondary" id="leaveRoomBtn">Покинуть комнату</button>
+                        <button class="btn btn-small" id="copySeedBtn">Копировать сид</button>
+                        <button class="btn btn-small btn-secondary" id="clearSeedBtn">Очистить сид</button>
                     </div>
+                    <div class="seed-info" id="seedInfo"></div>
                 </div>
-                <div class="players-list" id="playersList"></div>
             </div>
         </div>
         
         <div class="header">
             <h1>RISK OF RAIN 2 BINGO</h1>
-            <p>Зачеркивай испытания - всё синхронизируется!</p>
+            <p>Создайте сид и поделитесь с другом - поле синхронизируется</p>
         </div>
 
         <div class="controls">
@@ -362,47 +57,41 @@
             <div class="bingo-lines" id="bingoLines"></div>
         </div>
     </div>
-<!-- Подвал с рекламой -->
-<div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-top: 1px solid #2a2a4a; margin-top: 3rem; padding: 2rem 1rem 1rem 1rem;">
-    <div style="max-width: 900px; margin: 0 auto;">
-        <div style="text-align: center; margin-bottom: 1.5rem;">
-            <p style="color: #ff8c42; font-size: 1rem; font-weight: bold; margin: 0;">Подписывайтесь на этих ребят</p>
-        </div>
-        <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-            <!-- VLADEN69 / V14D3N -->
-            <div style="background: #2a2a4a; border: 1px solid #3a3a5a; border-radius: 1rem; transition: all 0.3s ease; width: 260px;">
-                <div style="padding: 1rem; text-align: center;">
-                    <div style="font-weight: bold; color: #ff8c42; margin-bottom: 0.3rem; font-size: 1rem;">VLADEN69</div>
-                    <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <a href="https://www.twitch.tv/vladen69" target="_blank" rel="noopener noreferrer" style="color: #ff8c42; font-size: 0.7rem; text-decoration: none;">Twitch</a>
-                        <span style="color: #555;">|</span>
-                        <a href="https://www.youtube.com/@v14d3n" target="_blank" rel="noopener noreferrer" style="color: #ff8c42; font-size: 0.7rem; text-decoration: none;">YouTube</a>
-                    </div>
-                    <div style="margin-top: 0.5rem;">
-                        <a href="https://www.twitch.tv/vladen69" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: #ff8c42; color: white; padding: 0.2rem 0.8rem; border-radius: 2rem; font-size: 0.65rem; font-weight: bold; text-decoration: none;">Подписаться</a>
-                    </div>
+
+    <!-- Footer с рекламой -->
+    <footer class="bingo-footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                <p>Подписывайтесь на этих ребят</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-link">
+                    <a href="https://www.twitch.tv/vladen69" target="_blank" rel="noopener noreferrer">
+                        <span class="link-name">VLADEN69</span>
+                        <span class="link-platform">Twitch</span>
+                    </a>
+                    <a href="https://www.youtube.com/@v14d3n" target="_blank" rel="noopener noreferrer">
+                        <span class="link-name">VLADEN69</span>
+                        <span class="link-platform">YouTube</span>
+                    </a>
+                </div>
+                <div class="footer-link">
+                    <a href="https://www.twitch.tv/tijoe" target="_blank" rel="noopener noreferrer">
+                        <span class="link-name">Tijoe</span>
+                        <span class="link-platform">Twitch</span>
+                    </a>
+                    <a href="https://www.youtube.com/@TijoeVideos" target="_blank" rel="noopener noreferrer">
+                        <span class="link-name">Tijoe</span>
+                        <span class="link-platform">YouTube</span>
+                    </a>
                 </div>
             </div>
-            <!-- Tijoe -->
-            <div style="background: #2a2a4a; border: 1px solid #3a3a5a; border-radius: 1rem; transition: all 0.3s ease; width: 260px;">
-                <div style="padding: 1rem; text-align: center;">
-                    <div style="font-weight: bold; color: #ff8c42; margin-bottom: 0.3rem; font-size: 1rem;">Tijoe</div>
-                    <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <a href="https://www.twitch.tv/tijoe" target="_blank" rel="noopener noreferrer" style="color: #ff8c42; font-size: 0.7rem; text-decoration: none;">Twitch</a>
-                        <span style="color: #555;">|</span>
-                        <a href="https://www.youtube.com/@TijoeVideos" target="_blank" rel="noopener noreferrer" style="color: #ff8c42; font-size: 0.7rem; text-decoration: none;">YouTube</a>
-                    </div>
-                    <div style="margin-top: 0.5rem;">
-                        <a href="https://www.twitch.tv/tijoe" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: #ff8c42; color: white; padding: 0.2rem 0.8rem; border-radius: 2rem; font-size: 0.65rem; font-weight: bold; text-decoration: none;">Подписаться</a>
-                    </div>
-                </div>
+            <div class="footer-copyright">
+                <p>© 2025 Challenge Wheels | Все права защищены</p>
             </div>
         </div>
-        <div style="text-align: center; padding-top: 1rem; border-top: 1px solid #2a2a4a;">
-            <p style="color: #555; font-size: 0.75rem;">© 2025 Challenge Wheels | Все права защищены</p>
-        </div>
-    </div>
-</div>
+    </footer>
+
     <script src="../../js/bingo/bingoror2.js"></script>
 </body>
 </html>
