@@ -16,17 +16,16 @@ const challenges = [
     "Иметь при себе 5 одинаковых дронов",
     "Пройти игру с артефактом возмездия (Vengeance)", "Пройти игру с артефактом эволюции (Evolution)",
     "Пройти игру с артефактом чести (Honor)", "Пройти игру с артефактом тайны (Enigma)",
-    "Пройти игру с артефактом изменения (Metamorphosis)", "Пройти игру с артефактом престижа (Prestige)"
+    "Пройти игру с артефактом изменения (Metamorphosis)", "Пройти игу с артефактом престижа (Prestige)"
 ];
 
 const GRID_SIZE = 5;
 const TOTAL_CELLS = 25;
 
 let currentBoard = [];
-let currentPlayers = [];
-let currentPlayerId = null;
-let currentRoomId = null;
-let syncInterval = null;
+let completedCells = [];
+let currentSeed = null;
+let seedExpireTimer = null;
 
 function generateRandomBoard() {
     const shuffled = [...challenges];
@@ -55,255 +54,214 @@ function renderGrid() {
     if (!grid) return;
     grid.innerHTML = '';
     
-    const myPlayer = currentPlayers.find(p => p.id === currentPlayerId);
-    
     for (let i = 0; i < TOTAL_CELLS; i++) {
         const cell = document.createElement('div');
-        cell.className = 'bingo-cell';
-        if (myPlayer && myPlayer.completedCells[i]) cell.classList.add('completed');
-        
-        cell.innerHTML = `<div class="cell-number">${i + 1}</div>
-                         <div class="cell-text">${currentBoard[i] || ''}</div>
-                         <div class="player-markers" id="markers-${i}"></div>`;
+        cell.className = `bingo-cell ${completedCells[i] ? 'completed' : ''}`;
+        cell.innerHTML = `
+            <div class="cell-number">${i + 1}</div>
+            <div class="cell-text">${currentBoard[i] || ''}</div>
+        `;
         cell.addEventListener('click', () => toggleCell(i));
         grid.appendChild(cell);
-        
-        const markers = document.getElementById(`markers-${i}`);
-        if (markers) {
-            markers.innerHTML = '';
-            for (const p of currentPlayers) {
-                if (p.completedCells[i]) {
-                    const marker = document.createElement('div');
-                    marker.className = 'marker';
-                    marker.style.background = p.id === currentPlayerId ? '#ff8c42' : '#4ecdc4';
-                    marker.title = p.name;
-                    marker.textContent = '✓';
-                    markers.appendChild(marker);
-                }
-            }
-        }
     }
     
-    if (myPlayer) {
-        const linesCount = countLines(myPlayer.completedCells);
-        const linesContainer = document.getElementById('bingoLines');
-        if (linesContainer) {
-            linesContainer.innerHTML = `<div class="line-stat">Собрано линий: ${linesCount}</div>`;
-            if (linesCount >= 5) showMessage(`Бинго! ${myPlayer.name} собрал ${linesCount} линий!`);
-        }
-    }
-    
-    const playersDiv = document.getElementById('playersList');
-    if (playersDiv) {
-        playersDiv.innerHTML = '<strong>Игроки:</strong><br>';
-        for (const p of currentPlayers) {
-            const completed = p.completedCells.filter(c => c).length;
-            const lines = countLines(p.completedCells);
-            playersDiv.innerHTML += `<div class="player-tag ${p.id === currentPlayerId ? 'you' : ''}">
-                ${p.name} ${p.id === currentPlayerId ? '(вы)' : ''} (${completed}/25, ${lines} линий)
-            </div>`;
-        }
+    const linesCount = countLines(completedCells);
+    const linesContainer = document.getElementById('bingoLines');
+    if (linesContainer) {
+        linesContainer.innerHTML = `<div class="line-stat">Собрано линий: ${linesCount}</div>`;
+        if (linesCount >= 5) showMessage(`Бинго! Вы собрали ${linesCount} линий!`);
     }
 }
 
-async function toggleCell(index) {
-    if (!currentRoomId || !currentPlayerId) return;
+function toggleCell(index) {
+    completedCells[index] = !completedCells[index];
+    saveProgress();
+    renderGrid();
     
-    const myPlayer = currentPlayers.find(p => p.id === currentPlayerId);
-    if (!myPlayer) return;
-    
-    // Обновляем локально
-    myPlayer.completedCells[index] = !myPlayer.completedCells[index];
-    
-    // Отправляем на сервер
-    try {
-        await fetch('/api/update', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                roomId: currentRoomId,
-                playerId: currentPlayerId,
-                completedCells: myPlayer.completedCells
-            })
-        });
-        
-        // Обновляем отображение
-        renderGrid();
-        
-    } catch (err) {
-        console.error('Ошибка отправки:', err);
-        showMessage('Ошибка синхронизации', true);
-        // Откатываем изменение
-        myPlayer.completedCells[index] = !myPlayer.completedCells[index];
-        renderGrid();
+    const linesCount = countLines(completedCells);
+    if (linesCount >= 5 && completedCells.some(cell => cell === true)) {
+        showMessage(`Бинго! Вы собрали ${linesCount} линий!`);
     }
 }
 
-async function syncWithServer() {
-    if (!currentRoomId) return;
-    
-    try {
-        const response = await fetch(`/api/sync/${currentRoomId}`);
-        const data = await response.json();
-        
-        if (data.success) {
-            // Обновляем данные с сервера
-            currentPlayers = data.players;
-            currentBoard = data.board;
-            renderGrid();
-        } else if (data.error === 'Комната не найдена') {
-            showMessage('Комната была закрыта', true);
-            leaveRoom();
-        }
-    } catch (err) {
-        console.error('Ошибка синхронизации:', err);
+function saveProgress() {
+    localStorage.setItem('ror2_bingo_progress', JSON.stringify(completedCells));
+    if (currentSeed) {
+        localStorage.setItem('ror2_bingo_current_seed', currentSeed);
     }
 }
 
-async function createRoom() {
-    const playerName = prompt('Введите ваше имя:', 'Игрок');
-    if (!playerName) return;
+function loadProgress() {
+    const saved = localStorage.getItem('ror2_bingo_progress');
+    if (saved) {
+        completedCells = JSON.parse(saved);
+    } else {
+        completedCells = new Array(TOTAL_CELLS).fill(false);
+    }
     
-    const newBoard = generateRandomBoard();
-    
+    const savedSeed = localStorage.getItem('ror2_bingo_current_seed');
+    if (savedSeed) {
+        currentSeed = savedSeed;
+        updateSeedDisplay();
+    }
+}
+
+function saveBoard() {
+    localStorage.setItem('ror2_bingo_board', JSON.stringify(currentBoard));
+}
+
+function loadBoard() {
+    const saved = localStorage.getItem('ror2_bingo_board');
+    if (saved) {
+        currentBoard = JSON.parse(saved);
+    } else {
+        currentBoard = generateRandomBoard();
+        saveBoard();
+    }
+}
+
+async function createSeed() {
     try {
         const response = await fetch('/api/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                playerName: playerName,
-                board: newBoard
-            })
+            body: JSON.stringify({ board: currentBoard })
         });
         
         const data = await response.json();
         
         if (data.success) {
-            currentRoomId = data.roomId;
-            currentPlayerId = data.playerId;
-            currentBoard = data.board;
-            currentPlayers = data.players;
+            currentSeed = data.seed;
+            localStorage.setItem('ror2_bingo_current_seed', currentSeed);
+            updateSeedDisplay();
+            showMessage(`Сид создан: ${currentSeed} (действует 5 часов)`);
             
-            document.getElementById('roomCode').textContent = currentRoomId;
-            document.getElementById('roomPanel').classList.remove('hidden');
-            document.getElementById('mainMenu').classList.add('hidden');
-            renderGrid();
-            showMessage(`Комната создана! Код: ${currentRoomId}`);
-            
-            // Запускаем синхронизацию
-            if (syncInterval) clearInterval(syncInterval);
-            syncInterval = setInterval(syncWithServer, 1000);
+            navigator.clipboard.writeText(currentSeed);
+            showMessage(`Сид скопирован в буфер обмена`);
         } else {
-            showMessage(data.error || 'Ошибка создания комнаты', true);
+            showMessage('Ошибка создания сида', true);
         }
     } catch (err) {
         showMessage('Ошибка соединения с сервером', true);
     }
 }
 
-async function joinRoom() {
-    const roomId = document.getElementById('roomIdInput').value;
-    if (!roomId) {
-        showMessage('Введите код комнаты', true);
+async function loadSeed() {
+    const seedInput = document.getElementById('seedInput');
+    const seed = seedInput.value.trim();
+    
+    if (!seed || seed.length !== 6) {
+        showMessage('Введите 6-значный сид', true);
         return;
     }
     
-    const playerName = prompt('Введите ваше имя:', 'Игрок');
-    if (!playerName) return;
-    
     try {
-        const response = await fetch('/api/join', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                roomId: roomId,
-                playerName: playerName
-            })
-        });
-        
+        const response = await fetch(`/api/load/${seed}`);
         const data = await response.json();
         
         if (data.success) {
-            currentRoomId = roomId;
-            currentPlayerId = data.playerId;
             currentBoard = data.board;
-            currentPlayers = data.players;
-            
-            document.getElementById('roomCode').textContent = currentRoomId;
-            document.getElementById('roomPanel').classList.remove('hidden');
-            document.getElementById('mainMenu').classList.add('hidden');
+            currentSeed = seed;
+            completedCells = new Array(TOTAL_CELLS).fill(false);
+            saveBoard();
+            saveProgress();
+            localStorage.setItem('ror2_bingo_current_seed', currentSeed);
             renderGrid();
-            showMessage('Вы присоединились к комнате!');
+            updateSeedDisplay();
             
-            // Запускаем синхронизацию
-            if (syncInterval) clearInterval(syncInterval);
-            syncInterval = setInterval(syncWithServer, 1000);
+            const timeText = `${data.expiresIn.hours}ч ${data.expiresIn.minutes}м`;
+            showMessage(`Поле загружено. Сид: ${seed} (действует ${timeText})`);
+            
+            seedInput.value = '';
         } else {
-            showMessage(data.error || 'Не удалось присоединиться', true);
+            showMessage(data.error || 'Сид не найден или истек', true);
         }
     } catch (err) {
-        showMessage('Ошибка соединения с сервером', true);
+        showMessage('Ошибка загрузки сида', true);
     }
 }
 
-async function leaveRoom() {
-    if (currentRoomId && currentPlayerId) {
-        try {
-            await fetch('/api/leave', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    roomId: currentRoomId,
-                    playerId: currentPlayerId
-                })
-            });
-        } catch (err) {}
+function updateSeedDisplay() {
+    const seedPanel = document.getElementById('seedPanel');
+    const mainMenu = document.getElementById('mainMenu');
+    const seedCode = document.getElementById('seedCode');
+    const seedInfo = document.getElementById('seedInfo');
+    
+    if (currentSeed) {
+        seedPanel.classList.remove('hidden');
+        mainMenu.classList.add('hidden');
+        seedCode.textContent = currentSeed;
+        seedInfo.innerHTML = `Сид активен 5 часов с момента создания`;
+        startSeedTimer();
+    } else {
+        seedPanel.classList.add('hidden');
+        mainMenu.classList.remove('hidden');
+        if (seedExpireTimer) clearInterval(seedExpireTimer);
     }
-    
-    if (syncInterval) clearInterval(syncInterval);
-    
-    currentRoomId = null;
-    currentPlayerId = null;
-    currentPlayers = [];
-    document.getElementById('roomPanel').classList.add('hidden');
-    document.getElementById('mainMenu').classList.remove('hidden');
-    initOffline();
 }
 
-function copyRoomCode() {
-    const code = document.getElementById('roomCode').textContent;
-    navigator.clipboard.writeText(code);
-    showMessage('Код скопирован!');
+function startSeedTimer() {
+    if (seedExpireTimer) clearInterval(seedExpireTimer);
+    
+    seedExpireTimer = setInterval(async () => {
+        if (currentSeed) {
+            try {
+                const response = await fetch(`/api/info/${currentSeed}`);
+                const data = await response.json();
+                
+                if (data.exists === false) {
+                    clearSeed();
+                    showMessage(`Сид ${currentSeed} истек. Создайте новый.`, true);
+                } else if (data.exists && data.timeLeftMs) {
+                    const hours = Math.floor(data.timeLeftMs / (60 * 60 * 1000));
+                    const minutes = Math.floor((data.timeLeftMs % (60 * 60 * 1000)) / (60 * 1000));
+                    const seedInfo = document.getElementById('seedInfo');
+                    if (seedInfo) {
+                        seedInfo.innerHTML = `Сид активен ещё ${hours}ч ${minutes}м`;
+                    }
+                }
+            } catch (err) {
+                console.error('Ошибка проверки сида:', err);
+            }
+        }
+    }, 60000);
+}
+
+function clearSeed() {
+    currentSeed = null;
+    localStorage.removeItem('ror2_bingo_current_seed');
+    updateSeedDisplay();
+    showMessage('Сид очищен');
+}
+
+function copySeed() {
+    if (currentSeed) {
+        navigator.clipboard.writeText(currentSeed);
+        showMessage('Сид скопирован');
+    }
 }
 
 function newGame() {
-    if (currentRoomId) {
-        showMessage('В режиме комнаты новое поле создает создатель комнаты', true);
-    } else {
-        if (confirm('Создать новое поле?')) {
-            currentBoard = generateRandomBoard();
-            renderGrid();
-            showMessage('Новое поле создано!');
-        }
+    if (confirm('Создать новое поле? Весь текущий прогресс будет потерян.')) {
+        currentBoard = generateRandomBoard();
+        completedCells = new Array(TOTAL_CELLS).fill(false);
+        currentSeed = null;
+        saveBoard();
+        saveProgress();
+        localStorage.removeItem('ror2_bingo_current_seed');
+        updateSeedDisplay();
+        renderGrid();
+        showMessage('Создано новое поле бинго');
     }
 }
 
 function resetProgress() {
-    if (currentRoomId) {
-        showMessage('В режиме комнаты сброс прогресса недоступен', true);
-    } else if (confirm('Сбросить все отметки?')) {
-        currentBoard = generateRandomBoard();
+    if (confirm('Сбросить все зачеркивания? Испытания на поле останутся те же.')) {
+        completedCells = new Array(TOTAL_CELLS).fill(false);
+        saveProgress();
         renderGrid();
-        showMessage('Прогресс сброшен!');
+        showMessage('Прогресс сброшен');
     }
-}
-
-function initOffline() {
-    const saved = localStorage.getItem('ror2_bingo_board');
-    currentBoard = saved ? JSON.parse(saved) : generateRandomBoard();
-    currentPlayers = [{ id: 'offline', name: 'Вы', completedCells: new Array(25).fill(false) }];
-    currentPlayerId = 'offline';
-    renderGrid();
 }
 
 function showMessage(text, isError = false) {
@@ -316,33 +274,22 @@ function showMessage(text, isError = false) {
 }
 
 function init() {
-    const roomPanel = document.getElementById('roomPanel');
-    const mainMenu = document.getElementById('mainMenu');
+    loadBoard();
+    loadProgress();
+    renderGrid();
     
-    if (roomPanel && mainMenu) {
-        roomPanel.classList.add('hidden');
-        mainMenu.classList.remove('hidden');
+    const savedSeed = localStorage.getItem('ror2_bingo_current_seed');
+    if (savedSeed) {
+        currentSeed = savedSeed;
+        updateSeedDisplay();
     }
     
-    initOffline();
-    
-    const createBtn = document.getElementById('createRoomBtn');
-    const joinBtn = document.getElementById('joinRoomBtn');
-    const leaveBtn = document.getElementById('leaveRoomBtn');
-    const copyBtn = document.getElementById('copyCodeBtn');
-    const newGameBtn = document.getElementById('newGameBtn');
-    const resetBtn = document.getElementById('resetProgressBtn');
-    
-    if (createBtn) createBtn.onclick = createRoom;
-    if (joinBtn) joinBtn.onclick = joinRoom;
-    if (leaveBtn) leaveBtn.onclick = leaveRoom;
-    if (copyBtn) copyBtn.onclick = copyRoomCode;
-    if (newGameBtn) newGameBtn.onclick = newGame;
-    if (resetBtn) resetBtn.onclick = resetProgress;
+    document.getElementById('createSeedBtn').onclick = createSeed;
+    document.getElementById('loadSeedBtn').onclick = loadSeed;
+    document.getElementById('copySeedBtn').onclick = copySeed;
+    document.getElementById('clearSeedBtn').onclick = clearSeed;
+    document.getElementById('newGameBtn').onclick = newGame;
+    document.getElementById('resetProgressBtn').onclick = resetProgress;
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
-}
+init();
